@@ -1,0 +1,17 @@
+{
+  "name": "afi-factory",
+  "version": "1.0.0",
+  "description": "AFI agent factory and templates",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Build script TBD'",
+    "test": "echo 'Test script TBD'"
+  },
+  "keywords": ["afi", "factory", "agents", "templates"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AFI-Protocol/afi-factory.git"
+  },
+  "license": "MIT"
+}
+
