@@ -4,8 +4,9 @@
   "description": "AFI agent factory and templates",
   "type": "module",
   "scripts": {
-    "build": "echo 'Build script TBD'",
-    "test": "echo 'Test script TBD'"
+    "build": "tsc",
+    "test": "echo 'No tests yet' && exit 0",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": ["afi", "factory", "agents", "templates"],
   "repository": {

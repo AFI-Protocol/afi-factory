@@ -1,4 +1,4 @@
-name: CI
+name: AFI Factory CI
 
 on:
   push:
@@ -10,9 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      - run: echo "CI workflow initialized"
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test --if-present
