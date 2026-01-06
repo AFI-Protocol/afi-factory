@@ -1,0 +1,31 @@
+{
+  "repo": "afi-factory",
+  "role": "Agent templates, versioning, and spawning",
+  "status": "active",
+  "language": "typescript",
+  "entrypoints": [
+    "src/template_registry.ts",
+    "agent_manifest.json"
+  ],
+  "provides": [
+    "agent-templates",
+    "agent-versioning",
+    "agent-spawning",
+    "template-registry"
+  ],
+  "dependsOn": [
+    "afi-core",
+    "afi-config"
+  ],
+  "consumers": [
+    "afi-reactor",
+    "afi-ops"
+  ],
+  "droid_ready": false,
+  "notes": [
+    "Phase 1 scaffolding",
+    "Needs README expansion",
+    "Needs real build/test scripts"
+  ]
+}
+
