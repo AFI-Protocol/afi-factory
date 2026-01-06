@@ -1,0 +1,22 @@
+{
+  "name": "afi-factory",
+  "version": "1.0.0",
+  "description": "AFI agent factory and templates",
+  "type": "module",
+  "exports": {
+    "./schemas/index": "./schemas/index.ts",
+    "./template_registry": "./template_registry.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'No tests yet' && exit 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["afi", "factory", "agents", "templates"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AFI-Protocol/afi-factory.git"
+  },
+  "license": "MIT"
+}
+
