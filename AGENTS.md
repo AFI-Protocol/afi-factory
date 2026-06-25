@@ -47,7 +47,7 @@ This repo has no dev server. Typical workflow:
 - `factory/` — Factory orchestration logic
 - `.afi-codex.json` — This repo's Codex metadata
 
-**Consumed by**: afi-core, afi-reactor, afi-starters, and agent deployment workflows.
+**Consumed by**: afi-core, afi-reactor, and agent deployment workflows.
 
 ---
 

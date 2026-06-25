@@ -58,7 +58,6 @@ Factory.ai droids can contribute:
 - **afi-core** - Agent runtime
 - **afi-reactor** - Agent orchestration
 - **afi-skills** - Agent skills library
-- **afi-starters** - Starter templates for developers
 
 ## License
 
