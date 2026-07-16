@@ -26,7 +26,6 @@ This repo is designed for both human engineers and Factory.ai agents to contribu
 ❌ Agent runtime code (→ `afi-core`)
 ❌ Agent orchestration (→ `afi-reactor`)
 ❌ Agent skills (→ `afi-skills`)
-❌ Plugin implementations (→ `afi-plugins`)
 
 ## Current Stage
 
