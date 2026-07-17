@@ -15,7 +15,7 @@ import { repoRoot, readJson } from './helpers.js';
  *    additionally BYTE-COMPARED against its source. A mismatch hard-fails.
  */
 
-const PINNED_COMMIT = 'e462c4e8bef5fda946ca19a826f5c53c6d202151';
+const PINNED_COMMIT = 'f91ce4465b9c54bc221ba82e7a468544ffcf3fe3';
 
 interface Manifest {
   afiConfigCommit: string;
