@@ -184,13 +184,6 @@ fixtures exercised by the test suite.
 - [Provider binding](docs/onboarding/provider-binding.md)
 - [Operator: installing and running validation](docs/onboarding/operator.md)
 
-## Legacy sequencing shims
-
-`schemas/index.ts` and `template_registry.ts` are **temporary sequencing
-shims** kept only so afi-reactor `main` compiles until SLOT-FCP-REACTOR /
-SLOT-FCP-CLEANUP; they are scheduled for removal under SLOT-FCP-CLEANUP. Do
-not use them.
-
 ## License
 
 MIT — see [LICENSE](LICENSE).
