@@ -14,6 +14,7 @@ import {
   buildToolDefinitions,
   CATALOG_VERSION,
 } from '../src/index.js';
+import { executeOperation } from '../src/operations/registry.js';
 
 /**
  * Operation-registry invariants (Section 14.2): one real handler per advertised
@@ -144,6 +145,31 @@ describe('invocation contract', () => {
     const res = await invokeOperation('factory.plugin.scaffold', { pluginId: 'x', category: 'technical' });
     expect(res.ok).toBe(false);
     expect(res.error!.code).toBe('workspace_required');
+  });
+
+  it('a forged op reusing a registered id cannot poison the real op validator', async () => {
+    // Regression: the validator cache is keyed by schema-object identity, so a
+    // forged def sharing a registered operationId but a looser schema cannot
+    // cause the real operation to enforce the looser schema.
+    const spoof = {
+      operationId: 'factory.template.validate', // reuse a real id
+      operationVersion: '1.0.0',
+      name: 'spoof',
+      description: 'spoof',
+      inputSchema: { $schema: 'http://json-schema.org/draft-07/schema#', type: 'object', additionalProperties: true },
+      outputSchema: { $schema: 'http://json-schema.org/draft-07/schema#', type: 'object', additionalProperties: true },
+      mutation: 'read-only',
+      determinism: 'deterministic',
+      fsPolicy: { readsWorkspace: false, writesWorkspace: false, readsBundledAssets: false, notes: 'spoof' },
+      handler: () => ({ anything: 1 }),
+    } as any;
+    // Prime the cache via the forged def first (loose schema accepts anything).
+    const primed = await executeOperation(spoof, { template: 'not-an-object', extra: 1 });
+    expect(primed.ok).toBe(true);
+    // The REAL registered op must still enforce ITS declared strict schema.
+    const real = await invokeOperation('factory.template.validate', { template: 'not-an-object', extra: 1 });
+    expect(real.ok).toBe(false);
+    expect(real.error!.code).toBe('invalid_input');
   });
 
   it('read-only operations perform no writes', async () => {

@@ -71,16 +71,21 @@ export function listOperationIds(): string[] {
   return [...OPERATIONS_BY_ID.keys()].sort();
 }
 
-// -- input/output schema validation (compiled once per operation+direction) --
+// -- input/output schema validation (compiled once per SCHEMA OBJECT) --
+// The cache is keyed by the schema object's identity, never by operationId: a
+// forged OperationDef that reuses a registered id but supplies its OWN schema
+// object gets its OWN validator and can never poison the validator enforced for
+// the real registered operation. Each operation's declared schema is therefore
+// always the schema actually enforced for it.
 const ajv = createFragmentAjv();
-const compiled = new Map<string, ValidateFunction>();
+const compiled = new WeakMap<object, ValidateFunction>();
 
 function validatorFor(op: OperationDef, dir: 'in' | 'out'): ValidateFunction {
-  const key = `${op.operationId}:${dir}`;
-  let v = compiled.get(key);
+  const schema = (dir === 'in' ? op.inputSchema : op.outputSchema) as object;
+  let v = compiled.get(schema);
   if (!v) {
-    v = ajv.compile(dir === 'in' ? op.inputSchema : op.outputSchema);
-    compiled.set(key, v);
+    v = ajv.compile(schema);
+    compiled.set(schema, v);
   }
   return v;
 }

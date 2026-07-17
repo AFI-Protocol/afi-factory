@@ -82,6 +82,17 @@ describe('write-target resolution', () => {
     expectFailureCode(() => resolveWriteTarget(root, 'sub/x.json', false), 'path_escape');
   });
 
+  it('rejects a DANGLING symlink whose (not-yet-existing) target is outside the root', () => {
+    // Regression: existsSync() returns false for a dangling symlink, so the
+    // symlink check must use lstat — otherwise writeFileSync follows the link
+    // and creates a file OUTSIDE the workspace.
+    const root = canonicalWorkspaceRoot({ root: freshRoot() });
+    const outsideTarget = join(freshOutside(), 'pwned.json'); // does NOT exist yet
+    symlinkSync(outsideTarget, join(root, 'link.json'));
+    expectFailureCode(() => resolveWriteTarget(root, 'link.json', false), 'path_escape');
+    expect(existsSync(outsideTarget), 'nothing was written outside the root').toBe(false);
+  });
+
   it('rejects overwrite without explicit permission, allows it with permission', () => {
     const root = canonicalWorkspaceRoot({ root: freshRoot() });
     writeFileSync(join(root, 'exists.json'), '{}');
@@ -133,6 +144,20 @@ describe('operation-level filesystem boundary (plugin.scaffold / artifact.packag
     expect(second.error!.code).toBe('overwrite_denied');
     const third = await invokeOperation('factory.plugin.scaffold', { ...args, overwrite: true }, { workspace: { root } });
     expect(third.ok).toBe(true);
+  });
+
+  it('scaffold through a pre-placed dangling symlink fails closed and writes nothing outside', async () => {
+    const root = freshRoot();
+    const outsideTarget = join(freshOutside(), 'evil.plugin.json'); // dangling target
+    symlinkSync(outsideTarget, join(root, 'evil.plugin.json'));
+    const res = await invokeOperation(
+      'factory.plugin.scaffold',
+      { pluginId: 'evil', category: 'technical', dir: '.' },
+      { workspace: { root } }
+    );
+    expect(res.ok).toBe(false);
+    expect(res.error!.code).toBe('path_escape');
+    expect(existsSync(outsideTarget), 'nothing escaped the workspace').toBe(false);
   });
 
   it('scaffold with an unknown category fails closed with unknown_category', async () => {

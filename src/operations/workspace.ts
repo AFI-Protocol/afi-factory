@@ -112,18 +112,27 @@ export function resolveWriteTarget(
   const realAncestor = deepestExistingReal(target);
   assertContained(root, realAncestor, 'output path (via an existing ancestor)');
 
-  // (3) if the target already exists, canonicalize it (catches a symlink whose
-  //     target is outside the root) and enforce the overwrite policy.
-  if (existsSync(target)) {
-    const realTarget = realpathSync(target);
-    assertContained(root, realTarget, 'existing output path');
-    // A symlink is never a legitimate write target inside a workspace.
-    if (lstatSync(target).isSymbolicLink()) {
+  // (3) Classify the target itself with lstat — which, UNLIKE existsSync, does
+  //     not follow symlinks and DOES observe a *dangling* symlink (one whose
+  //     target does not yet exist). A symlink is never a legitimate write
+  //     target: writing through it (even a dangling one, which writeFileSync
+  //     would happily follow to create a file OUTSIDE the root) fails closed.
+  let targetStat: ReturnType<typeof lstatSync> | undefined;
+  try {
+    targetStat = lstatSync(target);
+  } catch {
+    targetStat = undefined; // no filesystem entry at target at all -> fresh write
+  }
+  if (targetStat) {
+    if (targetStat.isSymbolicLink()) {
       throw new OperationFailure(
         ERROR_CODES.PATH_ESCAPE,
         'output path is a symlink; refusing to write through it'
       );
     }
+    // A real (non-symlink) entry exists: canonicalize and enforce overwrite policy.
+    const realTarget = realpathSync(target);
+    assertContained(root, realTarget, 'existing output path');
     if (!allowOverwrite) {
       throw new OperationFailure(
         ERROR_CODES.OVERWRITE_DENIED,
