@@ -12,7 +12,7 @@ the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
   closed) into concrete `afi.pipeline.v1` manifests.
 - **Manifest validation** — strict AJV validation against the **vendored,
   byte-pinned** afi-config contract closure (`src/governed-schema/`, pinned to
-  afi-config `e462c4e8bef5fda946ca19a826f5c53c6d202151`), plus the semantic
+  afi-config `f91ce4465b9c54bc221ba82e7a468544ffcf3fe3`), plus the semantic
   graph layer the schemas delegate to tooling: unique node ids, known edge
   endpoints, Kahn acyclicity, exactly one non-bypassable scorer sink,
   join-declaration rules, `prefer:` parent checks, condition-path
@@ -105,11 +105,11 @@ analyst configs). Conformance is pinned by the six vendored KAT vectors
 Domain tags carried on the emitted `CanonicalHash` objects are the
 **D-FCP-7 registered composition tags**: `afi.d2.composition-manifest`
 (manifestHash), `afi.d2.analyst-config` (analystConfigHash), and
-`afi.d2.plugin-set` (pluginSetHash). Note: the vendored hashing spec's
-exclusion table lists earlier `afi.factory.*` tag names for these artifact
-types; this implementation follows the governance decision's registered
-`afi.d2.*` tags — the digest **values** are identical either way (the domain
-tag is carried on the reference, not mixed into the digest).
+`afi.d2.plugin-set` (pluginSetHash) — exactly as listed in the vendored
+spec's exclusion table
+([`canonical-json-hashing.v1.md` §3](src/governed-schema/canonical-json-hashing.v1.md),
+W3a amendment). The domain tag is carried on the reference, never mixed
+into the digest.
 
 **pluginSetHash composition rule** — the canonical hash of
 
@@ -183,13 +183,6 @@ fixtures exercised by the test suite.
 - [Plugin developer](docs/onboarding/plugin-developer.md)
 - [Provider binding](docs/onboarding/provider-binding.md)
 - [Operator: installing and running validation](docs/onboarding/operator.md)
-
-## Legacy sequencing shims
-
-`schemas/index.ts` and `template_registry.ts` are **temporary sequencing
-shims** kept only so afi-reactor `main` compiles until SLOT-FCP-REACTOR /
-SLOT-FCP-CLEANUP; they are scheduled for removal under SLOT-FCP-CLEANUP. Do
-not use them.
 
 ## License
 

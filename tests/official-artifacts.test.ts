@@ -135,7 +135,7 @@ describe('official froggy-trend-pullback artifacts', () => {
   });
 
   it('hashes.json is EXACTLY what the hasher computes today (downstream waves pin these)', () => {
-    expect(hashes.afiConfigCommit).toBe('e462c4e8bef5fda946ca19a826f5c53c6d202151');
+    expect(hashes.afiConfigCommit).toBe('f91ce4465b9c54bc221ba82e7a468544ffcf3fe3');
     expect(hashes.manifestHash).toEqual(manifestHash(manifest));
     expect(hashes.analystConfigHash).toEqual(analystConfigHash(analystConfig));
     expect(hashes.pluginSetHash).toEqual(pluginSetHash(plugins));

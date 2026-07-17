@@ -18,7 +18,7 @@ npm test      # full suite: drift guard, hashing KATs, semantics, CLI behaviour
 contracts are **vendored and byte-pinned** in `src/governed-schema/`
 (provenance in `MANIFEST.json`). To additionally byte-verify the vendored
 closure against a pinned afi-config checkout (CI always does), set
-`AFI_CONFIG_DIR=/path/to/afi-config@e462c4e8` before `npm test`.
+`AFI_CONFIG_DIR=/path/to/afi-config@f91ce446` before `npm test`.
 
 ## Day-to-day commands
 

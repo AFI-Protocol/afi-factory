@@ -17,12 +17,13 @@
     "official-froggy-trend-pullback-artifacts"
   ],
   "dependsOn": [],
-  "consumers": [],
+  "consumers": [
+    "afi-reactor"
+  ],
   "droid_ready": false,
   "notes": [
-    "Consumes the afi-config governed contract family as a VENDORED byte-pinned schema closure (src/governed-schema/, afi-config@e462c4e8bef5fda946ca19a826f5c53c6d202151) — no package or file: dependency on afi-config; works from a clean clone",
-    "No consumers yet: afi-reactor will consume the authored artifacts under SLOT-FCP-REACTOR; its current file:../afi-factory dependency touches only the two temporary sequencing shims",
-    "schemas/index.ts and template_registry.ts are TEMPORARY SEQUENCING SHIMS kept so afi-reactor main compiles; removal scheduled under SLOT-FCP-CLEANUP",
+    "Consumes the afi-config governed contract family as a VENDORED byte-pinned schema closure (src/governed-schema/, afi-config@f91ce4465b9c54bc221ba82e7a468544ffcf3fe3) — no package or file: dependency on afi-config; works from a clean clone",
+    "afi-reactor consumes the authored artifacts (SLOT-FCP-REACTOR merged); it holds no package or file: dependency on this repo — the temporary sequencing shims were removed under D-FCP-9 after the replacing slots' gates passed",
     "Authorized by afi-governance/decisions/factory-configurable-pipelines-v1.md (SLOT-FCP-FACTORY row)"
   ]
 }

@@ -35,15 +35,12 @@ contracts — those live in afi-config.
 - `tests/` — vitest: drift guard, hashing KATs, semantic validation mirror,
   template instantiation, official artifacts, conformance fixtures, CLI
   behaviour, codegen freshness, no-dangling-references.
-- `schemas/index.ts`, `template_registry.ts` — **TEMPORARY SEQUENCING SHIMS**
-  for afi-reactor main. Do not use, do not extend; removal is scheduled under
-  SLOT-FCP-CLEANUP. Their package.json export entries must stay until then.
 
 ## Commands
 
 ```sh
 npm ci
-npm run typecheck   # tsc --noEmit over src + tests + shims
+npm run typecheck   # tsc --noEmit over src + tests
 npm run build       # tsc -> dist + copies governed-schema JSON into dist
 npm test            # builds first (pretest), then vitest run
 npm run codegen     # regenerate src/generated from src/governed-schema

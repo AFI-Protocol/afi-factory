@@ -1,6 +1,6 @@
 {
   "$comment": "Canonical hashes of the official froggy-trend-pullback artifacts, computed by the afi-factory hasher (canonical-json-hashing.v1; domain tags per D-FCP-7). Recomputed and asserted byte-equal by tests/official-artifacts.test.ts — downstream waves pin these values.",
-  "afiConfigCommit": "e462c4e8bef5fda946ca19a826f5c53c6d202151",
+  "afiConfigCommit": "f91ce4465b9c54bc221ba82e7a468544ffcf3fe3",
   "artifacts": {
     "template": "templates/official/froggy-trend-pullback/template.json",
     "pipelineManifest": "templates/official/froggy-trend-pullback/pipeline.manifest.json",

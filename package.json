@@ -13,15 +13,11 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./schemas/index": "./schemas/index.ts",
-    "./template_registry": "./template_registry.ts"
+    }
   },
   "files": [
     "dist",
     "src",
-    "schemas/index.ts",
-    "template_registry.ts",
     "templates",
     "fixtures",
     "docs",
