@@ -23,8 +23,17 @@ contracts — those live in afi-config.
 - `src/` — the library: `canonical-json.ts` (hashing), `schemas.ts` (strict
   AJV), `graph.ts` (graph semantics + plugin binding), `template.ts`
   (instantiation), `analyst-config.ts` (cross-artifact checks), `inspect.ts`,
-  `scaffold.ts`, `loader.ts`, `cli/index.ts` (commander CLI, wired as the
-  `afi-factory` bin).
+  `scaffold.ts`, `loader.ts`, `authoring.ts` (shared skeleton/slot helpers),
+  `cli/index.ts` (commander CLI, wired as the `afi-factory` bin).
+- `src/operations/` — the **agent capability layer**: one typed operation
+  registry (`handlers.ts` + `registry.ts`) wrapping the real library functions,
+  a normalized error contract (`errors.ts`), and the fail-closed workspace
+  boundary (`workspace.ts`). Every advertised capability has a real handler,
+  validated input/output schemas, and a declared fs/security policy. Do NOT add
+  a capability without a handler, and never hand-maintain a static catalog file.
+- `src/agent/` — projections over the registry: the deterministic capability
+  catalog (`catalog.ts`), the generic framework-neutral tool definitions
+  (`tools.ts`), and the MCP-compatible stdio adapter (`mcp.ts`, transport only).
 - `templates/official/froggy-trend-pullback/` — the official template, its
   instantiated canonical manifest, the seven official plugin manifests, the
   official analyst-config, and `hashes.json` (committed canonical hashes that
@@ -44,6 +53,12 @@ npm run typecheck   # tsc --noEmit over src + tests
 npm run build       # tsc -> dist + copies governed-schema JSON into dist
 npm test            # builds first (pretest), then vitest run
 npm run codegen     # regenerate src/generated from src/governed-schema
+
+# agent capability layer
+afi-factory capabilities --json     # deterministic capability catalog
+afi-factory capabilities --tools    # generic (framework-neutral) tool definitions
+afi-factory capabilities --hash     # stable catalog hash
+afi-factory agent serve --transport stdio --workspace <dir>   # MCP stdio adapter
 ```
 
 ## Rules
@@ -58,3 +73,10 @@ npm run codegen     # regenerate src/generated from src/governed-schema
   manifestHash / analystConfigHash / pluginSetHash values.
 - **No executor code.** Anything that runs a pipeline belongs to afi-reactor
   (SLOT-FCP-REACTOR), not here.
+- **One source of truth for capabilities.** The SDK, CLI, catalog, tool
+  definitions, and MCP adapter all project over `src/operations/`. Never
+  duplicate a capability description or schema, and never contact live AFI
+  services from the agent layer.
+- **Not the API Atlas.** The Factory capability catalog is authoring-side
+  implementation metadata, not a network-wide service map; that is reserved for
+  the future API Atlas and is out of scope here.
