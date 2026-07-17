@@ -25,6 +25,11 @@ import type { PipelineTemplate } from '../generated/pipeline-template.js';
 import type { AnalysisPluginManifest } from '../generated/analysis-plugin.js';
 import type { AnalystStrategyConfig } from '../generated/analyst-strategy-config.js';
 import type { CanonicalHash } from '../generated/canonical-hash.js';
+import { skeletonTemplate, slotsToStrings } from '../authoring.js';
+import { OPERATIONS } from '../operations/registry.js';
+import { buildCapabilityCatalog, catalogHash } from '../agent/catalog.js';
+import { buildToolDefinitions } from '../agent/tools.js';
+import { serveMcpStdio } from '../agent/mcp.js';
 
 const program = new Command();
 
@@ -518,55 +523,60 @@ afi-factory analyst-config validate analyst-config.json --pipeline pipeline.mani
     else created.forEach((f) => process.stdout.write(`created ${f}\n`));
   });
 
-// ------------------------------------------------------------------ helpers
-function skeletonTemplate(templateId: string, pipelineId: string): Record<string, unknown> {
-  return {
-    schema: 'afi.pipeline-template.v1',
-    templateId,
-    templateVersion: 'v0.1.0',
-    description: 'SKELETON template: single technical stage into the scorer. Edit the graph, parameters, and plugin bindings.',
-    parameters: [
-      {
-        name: 'technicalTimeoutMs',
-        schema: { type: 'integer', minimum: 1 },
-        required: false,
-        default: 5000,
-        description: 'Timeout for the technical stage.',
-      },
-    ],
-    pipelineId,
-    pipelineVersion: 'v0.1.0',
-    entry: 'technical',
-    nodes: [
-      {
-        id: 'technical',
-        category: 'technical',
-        pluginId: 'my-technical',
-        pluginVersion: '0.1.0',
-        timeoutMs: { $param: 'technicalTimeoutMs' },
-      },
-      {
-        id: 'scorer',
-        category: 'scorer',
-        pluginId: 'my-scorer',
-        pluginVersion: '0.1.0',
-      },
-    ],
-    edges: [{ from: 'technical', to: 'scorer' }],
-  };
-}
+// ---------------------------------------------------------- capabilities
+// (skeletonTemplate + slotsToStrings now live in ../authoring.js — one source,
+// shared with the agent operation handlers.)
+program
+  .command('capabilities')
+  .option('--json', 'emit the deterministic machine-readable capability catalog')
+  .option('--tools', 'emit the generic (framework-neutral) agent tool definitions')
+  .option('--hash', 'emit only the deterministic catalog hash')
+  .description('Factory agent capability catalog — the implementation-backed operation registry')
+  .action((opts: { json?: boolean; tools?: boolean; hash?: boolean }) => {
+    const catalog = buildCapabilityCatalog(OPERATIONS);
+    if (opts.hash) {
+      process.stdout.write(catalogHash(catalog) + '\n');
+      return;
+    }
+    if (opts.tools) {
+      process.stdout.write(JSON.stringify(buildToolDefinitions(OPERATIONS), null, 2) + '\n');
+      return;
+    }
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(catalog, null, 2) + '\n');
+      return;
+    }
+    process.stdout.write(
+      `Factory capability catalog v${catalog.catalogVersion} (hash ${catalogHash(catalog)})\n`
+    );
+    for (const op of catalog.operations) {
+      process.stdout.write(`  ${op.operationId}  [${op.mutation}/${op.determinism}]  ${op.name}\n`);
+    }
+  });
 
-function slotsToStrings(x: unknown): unknown {
-  if (Array.isArray(x)) return x.map(slotsToStrings);
-  if (x && typeof x === 'object') {
-    const keys = Object.keys(x);
-    if (keys.length === 1 && keys[0] === '$param') return `$param:${(x as { $param: string }).$param}`;
-    const out: Record<string, unknown> = {};
-    keys.forEach((k) => (out[k] = slotsToStrings((x as Record<string, unknown>)[k])));
-    return out;
-  }
-  return x;
-}
+// ---------------------------------------------------------------- agent
+const agent = program.command('agent').description('agent-facing Factory surfaces');
+
+agent
+  .command('serve')
+  .option('--transport <kind>', 'transport (only "stdio" is supported)', 'stdio')
+  .option('--workspace <dir>', 'workspace root; mutating operations write ONLY inside it')
+  .description('serve the Factory operation registry to an agent over an MCP-compatible stdio transport')
+  .action(async (opts: { transport: string; workspace?: string }) => {
+    if (opts.transport !== 'stdio') {
+      throw new CliError(`unsupported transport '${opts.transport}' (only "stdio" is supported)`);
+    }
+    const workspace = opts.workspace ? { root: opts.workspace } : undefined;
+    await new Promise<void>((resolvePromise) => {
+      serveMcpStdio({
+        input: process.stdin,
+        output: process.stdout,
+        workspace,
+        onClose: () => resolvePromise(),
+      });
+      process.stdin.resume();
+    });
+  });
 
 // ----------------------------------------------------------------- run
 try {

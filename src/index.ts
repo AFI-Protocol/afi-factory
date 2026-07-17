@@ -88,3 +88,53 @@ export {
 
 // Scaffolding.
 export { scaffoldPluginManifest, scaffoldPluginContract, CATEGORIES, type PluginCategory } from './scaffold.js';
+
+// Shared authoring helpers (skeleton builders + slot rendering; used by CLI + agent).
+export { skeletonTemplate, skeletonAnalystConfig, slotsToStrings, type AnalystConfigSkeletonOptions } from './authoring.js';
+
+// -------------------------------------------------------------------------
+// Agent capability layer: ONE implementation-backed operation registry, with
+// the SDK, CLI, capability catalog, generic tool definitions, and MCP adapter
+// all projecting over the same typed operation handlers.
+// -------------------------------------------------------------------------
+export {
+  OPERATIONS,
+  getOperation,
+  listOperationIds,
+  invokeOperation,
+  DOMAIN_OPERATIONS,
+  ANALYSIS_CATEGORIES,
+  ERROR_CODES,
+  OperationFailure,
+  OPERATION_ERROR_SCHEMA,
+  canonicalWorkspaceRoot,
+  resolveWriteTarget,
+  resolveReadTarget,
+  readWorkspaceJson,
+  loadAllBundledTemplates,
+  loadBundledTemplate,
+  listBundledTemplateDirs,
+  type OperationDef,
+  type OperationResult,
+  type OperationError,
+  type OperationContext,
+  type Workspace,
+  type Mutability,
+  type Determinism,
+  type FsPolicy,
+  type ErrorCode,
+  type BundledTemplate,
+} from './operations/index.js';
+
+export {
+  buildCapabilityCatalog,
+  catalogHash,
+  CATALOG_VERSION,
+  buildToolDefinitions,
+  serveMcpStdio,
+  MCP_PROTOCOL_VERSION,
+  type CapabilityCatalog,
+  type CatalogEntry,
+  type ToolDefinition,
+  type McpServerOptions,
+} from './agent/index.js';

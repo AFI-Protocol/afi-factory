@@ -28,6 +28,43 @@ the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
 - **Plugin scaffolding** — `afi.analysis-plugin.v1` manifest skeletons plus a
   TypeScript implementation-contract stub.
 
+## Agent capability layer
+
+Every authoring capability above is also exposed to agents through **one
+implementation-backed operation registry** (`src/operations/`). The TypeScript
+SDK, the `afi-factory` CLI, the machine-readable capability catalog, the generic
+agent-tool definitions, and the MCP adapter are all **projections over the same
+typed operation handlers** — a capability cannot exist without a real handler,
+a validated input schema, a validated output schema, a declared filesystem/
+security policy, and test coverage. Changing or removing an operation changes
+every projection.
+
+- **Machine-readable capability discovery** — `afi-factory capabilities --json`
+  emits a deterministic catalog (stable id-sorted order, no timestamps/paths/
+  usernames; equivalent registries hash identically via `--hash`).
+- **Generic (framework-neutral) agent-tool definitions** — `capabilities --tools`
+  emits neutral `{ name, description, inputSchema }` tools suitable for any
+  function-calling / tool-using agent system; no framework is the authority.
+- **MCP-compatible stdio adapter** — `afi-factory agent serve --transport stdio
+  [--workspace <dir>]` speaks newline-delimited JSON-RPC 2.0 (`initialize`,
+  `tools/list`, `tools/call`). It opens no network listener, executes no shell,
+  performs no dynamic import, and grants no filesystem access beyond a mutating
+  operation's declared workspace boundary.
+- **Pipeline-component discovery** — `factory.plugins.list` surfaces each
+  analysis-plugin's category, version, schema refs, determinism, params schema,
+  `multiInstance`, and `mayFeedScorer`, plus the five analyst-configurable
+  categories (`technical`, `pattern`, `sentiment`, `news`, `aiMl`).
+- **Fail-closed filesystem boundary** — every mutating operation
+  (`factory.plugin.scaffold`, `factory.artifact.package`) writes ONLY inside an
+  explicit workspace root; traversal, absolute-path escape, symlink escape,
+  symlinked-parent escape, and unauthorized overwrite fail closed on canonical
+  paths (never string prefixes).
+
+The operation layer is implementation metadata for authoring AFI pipeline
+artifacts. It is not a network-wide capability catalog: mapping externally
+exposed capabilities across AFI services is reserved for the future API Atlas,
+which this repo neither implements nor claims.
+
 ## What Factory does NOT do
 
 - It is **not a protocol authority**: the canonical contracts live in
