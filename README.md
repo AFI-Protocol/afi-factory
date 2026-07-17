@@ -105,11 +105,11 @@ analyst configs). Conformance is pinned by the six vendored KAT vectors
 Domain tags carried on the emitted `CanonicalHash` objects are the
 **D-FCP-7 registered composition tags**: `afi.d2.composition-manifest`
 (manifestHash), `afi.d2.analyst-config` (analystConfigHash), and
-`afi.d2.plugin-set` (pluginSetHash). Note: the vendored hashing spec's
-exclusion table lists earlier `afi.factory.*` tag names for these artifact
-types; this implementation follows the governance decision's registered
-`afi.d2.*` tags — the digest **values** are identical either way (the domain
-tag is carried on the reference, not mixed into the digest).
+`afi.d2.plugin-set` (pluginSetHash) — exactly as listed in the vendored
+spec's exclusion table
+([`canonical-json-hashing.v1.md` §3](src/governed-schema/canonical-json-hashing.v1.md),
+W3a amendment). The domain tag is carried on the reference, never mixed
+into the digest.
 
 **pluginSetHash composition rule** — the canonical hash of
 
