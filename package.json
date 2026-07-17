@@ -1,20 +1,58 @@
 {
   "name": "afi-factory",
   "version": "1.0.0",
-  "description": "AFI agent factory and templates",
+  "description": "AFI pipeline authoring system: template authoring/instantiation, manifest validation, canonical hashing, graph inspection, and plugin scaffolding for the afi.pipeline.v1 contract family (SLOT-FCP-FACTORY)",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "bin": {
+    "afi-factory": "./dist/cli/index.js"
+  },
   "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./schemas/index": "./schemas/index.ts",
     "./template_registry": "./template_registry.ts"
   },
+  "files": [
+    "dist",
+    "src",
+    "schemas/index.ts",
+    "template_registry.ts",
+    "templates",
+    "fixtures",
+    "docs",
+    "README.md",
+    "AGENTS.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc",
-    "test": "echo 'No tests yet' && exit 0",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "codegen": "node scripts/codegen.mjs",
+    "pretest": "npm run build",
+    "test": "vitest run"
   },
-  "keywords": ["afi", "factory", "agents", "templates"],
+  "keywords": [
+    "afi",
+    "factory",
+    "pipeline",
+    "authoring",
+    "canonical-hashing"
+  ],
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^3.0.1",
+    "commander": "^12.1.0"
+  },
   "devDependencies": {
-    "typescript": "~6.0.3"
+    "@types/node": "^20.11.0",
+    "json-schema-to-typescript": "15.0.4",
+    "typescript": "^5.4.0",
+    "vitest": "^4.0.14"
   },
   "repository": {
     "type": "git",
@@ -22,4 +60,3 @@
   },
   "license": "MIT"
 }
-

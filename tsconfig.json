@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "outDir": "./dist",
-    "rootDir": ".",
-    "declaration": true
+    "noEmit": true,
+    "declaration": true,
+    "types": ["node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "schemas/index.ts", "template_registry.ts"],
   "exclude": ["node_modules", "dist"]
 }
-

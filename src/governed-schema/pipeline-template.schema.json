@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://afi-protocol.org/schemas/pipeline-template/v1/pipeline-template.schema.json",
+  "title": "AFI Pipeline Template v1 (FACTORY-CONTRACT — parameterized pipeline topology)",
+  "description": "A pipeline TEMPLATE (afi.pipeline-template.v1) is the afi.pipeline.v1 shape plus templateId + templateVersion + a declared parameters[] list, with substitution points expressed as {\"$param\":\"<name>\"} value slots anywhere a concrete value is legal. The Factory INSTANTIATES a template by resolving every slot against caller-supplied parameter values (validated against each parameter's inline JSON-schema fragment, defaults applied) and emitting a concrete afi.pipeline.v1 manifest, which MUST then pass the full pipeline contract (schema + graph constraints). Templates are authoring artifacts only: nothing executes a template.",
+  "$comment": "BOUNDARY (FACTORY-CONTRACT): schema/contract only. The instantiation contract is documented in this directory's README and proven by the instantiation test in tests/pipeline-schema-validation.test.ts (template example + params -> valid afi.pipeline.v1). Graph-semantic constraints are NOT re-stated here: they bind the INSTANTIATED pipeline (a template whose every instantiation violates them is unusable, which tooling surfaces at instantiation time). Structure slots are deliberately NOT parameterizable: node ids, categories, pluginIds, edge endpoints, join declarations, and identity fields are concrete — parameters tune values, never topology.",
+  "x-afiStatus": "governed-contract",
+  "x-afiPartOf": "AFI Factory — Analyst-Configurable Pipelines V1 (FACTORY-CONTRACT)",
+  "x-afiDoctrineRefs": [
+    "afi-governance/decisions/factory-configurable-pipelines-v1 — authorizes the canonical V1 contract family",
+    "https://afi-protocol.org/schemas/pipeline/v1/pipeline.schema.json — the concrete contract every instantiation must satisfy"
+  ],
+  "x-afiConstraints": {
+    "declaredSlots": "TOOLING-ENFORCED: every {\"$param\":\"<name>\"} slot in the template MUST reference a declared parameters[].name; parameter names MUST be unique. Checked by tests/pipeline-schema-validation.test.ts.",
+    "instantiation": "The Factory resolves parameters -> concrete afi.pipeline.v1: (1) validate supplied values against each parameter's schema fragment; (2) apply defaults for absent optional parameters; (3) fail closed if a required parameter (required:true, no default) is absent; (4) deep-replace every slot with its resolved value; (5) drop templateId/templateVersion/parameters and set schema to 'afi.pipeline.v1'; (6) the result MUST validate against the full pipeline contract (schema + x-afiConstraints graph semantics) or instantiation fails closed.",
+    "topologyIsConcrete": "Node ids, categories, pluginIds, edge endpoints, entry, and join declarations are concrete in the template — parameters tune VALUES (timeouts, retries, config, condition operands, plugin versions), never graph structure.",
+    "hashMaterial": "Canonical template hashing follows schemas/hashing/canonical-json-hashing.v1.md (domain tag afi.factory.pipeline-template), excluding description and metadata."
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "templateId",
+    "templateVersion",
+    "parameters",
+    "pipelineId",
+    "pipelineVersion",
+    "entry",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "afi.pipeline-template.v1",
+      "description": "Schema-id version of the pipeline template."
+    },
+    "templateId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Stable identifier of the template."
+    },
+    "templateVersion": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the template (WITH v prefix). New version per change, never mutation."
+    },
+    "parameters": {
+      "type": "array",
+      "description": "Declared substitution parameters. Every {\"$param\":\"<name>\"} slot in the template must reference one of these names (x-afiConstraints.declaredSlots).",
+      "items": { "$ref": "#/definitions/parameter" }
+    },
+    "pipelineId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "pipelineId of the instantiated pipeline (concrete — identity is never parameterized)."
+    },
+    "pipelineVersion": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "pipelineVersion of the instantiated pipeline (concrete)."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "OPTIONAL annotation; excluded from canonical hash material."
+    },
+    "entry": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Entry node id of the instantiated pipeline (concrete)."
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/templateNode" },
+      "contains": {
+        "type": "object",
+        "properties": { "category": { "const": "scorer" } },
+        "required": ["category"]
+      },
+      "description": "Template nodes: the afi.pipeline.v1 node shape with {\"$param\":...} slots admissible wherever a concrete tunable value is legal."
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/templateEdge" },
+      "description": "Template edges: the afi.pipeline.v1 edge shape; condition operands may be slots."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "OPTIONAL free-form annotations; non-authoritative; excluded from canonical hash material."
+    }
+  },
+  "definitions": {
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "schema", "required"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+          "maxLength": 64,
+          "description": "Parameter name referenced by {\"$param\":\"<name>\"} slots. Unique within the template."
+        },
+        "schema": {
+          "type": "object",
+          "description": "Inline JSON Schema (draft-07) fragment the supplied value must validate against at instantiation time."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether a value MUST be supplied at instantiation (true and no default => fail closed when absent)."
+        },
+        "default": {
+          "description": "OPTIONAL default value applied when the parameter is not supplied. Must itself validate against the parameter's schema fragment."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "OPTIONAL human-readable purpose of the parameter."
+        }
+      }
+    },
+    "paramSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$param"],
+      "properties": {
+        "$param": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+          "description": "Name of a declared parameter whose resolved value replaces this slot at instantiation."
+        }
+      },
+      "description": "A substitution point: {\"$param\":\"<name>\"} stands anywhere a concrete tunable value is legal."
+    },
+    "nodeId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "templateNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "category", "pluginId", "pluginVersion"],
+      "properties": {
+        "id": { "$ref": "#/definitions/nodeId" },
+        "category": {
+          "type": "string",
+          "enum": ["technical", "pattern", "sentiment", "news", "aiMl", "merge", "scorer"]
+        },
+        "pluginId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Concrete plugin binding (never a slot — topology and binding are concrete)."
+        },
+        "pluginVersion": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+            },
+            { "$ref": "#/definitions/paramSlot" }
+          ],
+          "description": "Exact plugin semver, or a slot resolving to one."
+        },
+        "config": {
+          "type": "object",
+          "description": "OPTIONAL node configuration. Slots are admissible anywhere inside (resolved recursively at instantiation); the resolved object is validated downstream against the plugin's paramsSchema."
+        },
+        "timeoutMs": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1 },
+            { "$ref": "#/definitions/paramSlot" }
+          ]
+        },
+        "maxRetries": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "$ref": "#/definitions/paramSlot" }
+          ]
+        },
+        "retryDelayMs": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "$ref": "#/definitions/paramSlot" }
+          ]
+        },
+        "backoff": {
+          "oneOf": [
+            { "type": "string", "enum": ["none", "fixed", "exponential"] },
+            { "$ref": "#/definitions/paramSlot" }
+          ]
+        },
+        "critical": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "$ref": "#/definitions/paramSlot" }
+          ]
+        },
+        "failurePolicy": {
+          "oneOf": [
+            { "type": "string", "enum": ["abort", "degrade"] },
+            { "$ref": "#/definitions/paramSlot" }
+          ],
+          "description": "The degrade-only-when-critical:false coupling binds the INSTANTIATED pipeline (afi.pipeline.v1 enforces it structurally)."
+        },
+        "resourceLimits": {
+          "type": "object",
+          "description": "OPTIONAL operational resource limits; slots admissible inside."
+        },
+        "join": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["policy", "merge"],
+          "properties": {
+            "policy": { "type": "string", "const": "all" },
+            "merge": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["strategy", "conflictRule"],
+              "properties": {
+                "strategy": {
+                  "type": "string",
+                  "enum": ["namespace-by-node", "declared-fields"]
+                },
+                "conflictRule": {
+                  "type": "string",
+                  "pattern": "^(error|prefer:[a-z0-9-]+)$"
+                }
+              }
+            }
+          },
+          "description": "Concrete join declaration (never a slot — determinism of the join is structural)."
+        }
+      }
+    },
+    "templateEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "$ref": "#/definitions/nodeId" },
+        "to": { "$ref": "#/definitions/nodeId" },
+        "fromPort": { "type": "string", "minLength": 1 },
+        "toPort": { "type": "string", "minLength": 1 },
+        "condition": { "$ref": "#/definitions/templatePredicate" },
+        "optional": { "type": "boolean", "default": false }
+      }
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^(/[A-Za-z0-9_.-]+)+$"
+    },
+    "scalarOrSlot": {
+      "oneOf": [
+        { "type": ["string", "number", "boolean", "null"] },
+        { "$ref": "#/definitions/paramSlot" }
+      ]
+    },
+    "numberOrSlot": {
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/definitions/paramSlot" }
+      ]
+    },
+    "templateComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "value"],
+      "properties": {
+        "path": { "$ref": "#/definitions/path" },
+        "value": { "$ref": "#/definitions/scalarOrSlot" }
+      }
+    },
+    "templateOrderedComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "value"],
+      "properties": {
+        "path": { "$ref": "#/definitions/path" },
+        "value": { "$ref": "#/definitions/numberOrSlot" }
+      }
+    },
+    "templatePredicate": {
+      "description": "The afi.pipeline.v1 predicate tree with slots admissible as comparison operands, or a whole-condition slot.",
+      "oneOf": [
+        { "$ref": "#/definitions/paramSlot" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["all"],
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/definitions/templatePredicate" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["any"],
+          "properties": {
+            "any": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/definitions/templatePredicate" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["not"],
+          "properties": {
+            "not": { "$ref": "#/definitions/templatePredicate" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["exists"],
+          "properties": {
+            "exists": { "$ref": "#/definitions/path" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["eq"],
+          "properties": { "eq": { "$ref": "#/definitions/templateComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ne"],
+          "properties": { "ne": { "$ref": "#/definitions/templateComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gt"],
+          "properties": { "gt": { "$ref": "#/definitions/templateOrderedComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gte"],
+          "properties": { "gte": { "$ref": "#/definitions/templateOrderedComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lt"],
+          "properties": { "lt": { "$ref": "#/definitions/templateOrderedComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lte"],
+          "properties": { "lte": { "$ref": "#/definitions/templateOrderedComparison" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["in"],
+          "properties": {
+            "in": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "values"],
+              "properties": {
+                "path": { "$ref": "#/definitions/path" },
+                "values": {
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": { "$ref": "#/definitions/scalarOrSlot" }
+                    },
+                    { "$ref": "#/definitions/paramSlot" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
