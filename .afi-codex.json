@@ -1,31 +1,28 @@
 {
   "repo": "afi-factory",
-  "role": "Agent templates, versioning, and spawning",
+  "role": "Pipeline authoring system: template authoring/instantiation, manifest validation, canonical hashing, graph inspection, plugin scaffolding for the afi.pipeline.v1 contract family (SLOT-FCP-FACTORY; replaceable authoring implementation per D-FCP-4 — not a protocol authority, not the executor)",
   "status": "active",
   "language": "typescript",
   "entrypoints": [
-    "src/template_registry.ts",
-    "agent_manifest.json"
+    "src/index.ts",
+    "src/cli/index.ts"
   ],
   "provides": [
-    "agent-templates",
-    "agent-versioning",
-    "agent-spawning",
-    "template-registry"
+    "pipeline-template-authoring",
+    "template-instantiation",
+    "pipeline-manifest-validation",
+    "canonical-json-hashing",
+    "graph-inspection",
+    "plugin-scaffolding",
+    "official-froggy-trend-pullback-artifacts"
   ],
-  "dependsOn": [
-    "afi-core",
-    "afi-config"
-  ],
-  "consumers": [
-    "afi-reactor",
-    "afi-ops"
-  ],
+  "dependsOn": [],
+  "consumers": [],
   "droid_ready": false,
   "notes": [
-    "Phase 1 scaffolding",
-    "Needs README expansion",
-    "Needs real build/test scripts"
+    "Consumes the afi-config governed contract family as a VENDORED byte-pinned schema closure (src/governed-schema/, afi-config@e462c4e8bef5fda946ca19a826f5c53c6d202151) — no package or file: dependency on afi-config; works from a clean clone",
+    "No consumers yet: afi-reactor will consume the authored artifacts under SLOT-FCP-REACTOR; its current file:../afi-factory dependency touches only the two temporary sequencing shims",
+    "schemas/index.ts and template_registry.ts are TEMPORARY SEQUENCING SHIMS kept so afi-reactor main compiles; removal scheduled under SLOT-FCP-CLEANUP",
+    "Authorized by afi-governance/decisions/factory-configurable-pipelines-v1.md (SLOT-FCP-FACTORY row)"
   ]
 }
-

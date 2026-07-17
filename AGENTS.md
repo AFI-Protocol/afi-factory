@@ -1,101 +1,63 @@
-# afi-factory — Agent Instructions
+# AGENTS.md — afi-factory
 
-**afi-factory** is the agent factory and template library for AFI Protocol. It provides agent templates, factory manifests, and task runners for creating and configuring AFI agents.
+Honest orientation for agents working in this repo.
 
-**Global Authority**: All agents operating in AFI Protocol repos must follow `afi-config/codex/governance/droids/AFI_DROID_CHARTER.v0.1.md`. If this AGENTS.md conflicts with the Charter, **the Charter wins**.
+## What this repo is
 
----
+The **pipeline authoring system** for AFI's analyst-configurable pipelines
+program (SLOT-FCP-FACTORY under
+`afi-governance/decisions/factory-configurable-pipelines-v1.md`). It is a
+**replaceable implementation** (D-FCP-4): template authoring/instantiation,
+manifest validation, canonical hashing, graph inspection, plugin scaffolding.
+It is NOT a protocol authority, NOT the executor, and holds no canonical
+contracts — those live in afi-config.
 
-## Build & Test
+## Layout
 
-```bash
-# Install dependencies
-npm install
+- `src/governed-schema/` — **vendored, byte-pinned** copies of the afi-config
+  contracts this repo consumes (pinned commit + per-file sha256 in
+  `MANIFEST.json`). NEVER hand-edit; re-vendor only from an owner-approved
+  afi-config commit and update `MANIFEST.json` + run `npm run codegen`.
+- `src/generated/` — TypeScript types **generated** from the vendored schemas
+  (`npm run codegen`). Never hand-edit; freshness is test-enforced.
+- `src/` — the library: `canonical-json.ts` (hashing), `schemas.ts` (strict
+  AJV), `graph.ts` (graph semantics + plugin binding), `template.ts`
+  (instantiation), `analyst-config.ts` (cross-artifact checks), `inspect.ts`,
+  `scaffold.ts`, `loader.ts`, `cli/index.ts` (commander CLI, wired as the
+  `afi-factory` bin).
+- `templates/official/froggy-trend-pullback/` — the official template, its
+  instantiated canonical manifest, the seven official plugin manifests, the
+  official analyst-config, and `hashes.json` (committed canonical hashes that
+  downstream waves pin — regenerate only together with the artifacts and only
+  when the change is authorized).
+- `fixtures/conformance/` — the eight configurability proof graphs
+  (non-production).
+- `tests/` — vitest: drift guard, hashing KATs, semantic validation mirror,
+  template instantiation, official artifacts, conformance fixtures, CLI
+  behaviour, codegen freshness, no-dangling-references.
+- `schemas/index.ts`, `template_registry.ts` — **TEMPORARY SEQUENCING SHIMS**
+  for afi-reactor main. Do not use, do not extend; removal is scheduled under
+  SLOT-FCP-CLEANUP. Their package.json export entries must stay until then.
 
-# Build TypeScript
-npm run build
+## Commands
 
-# Type check
-npm run typecheck
-
-# Run tests (placeholder - no tests yet)
-npm test
+```sh
+npm ci
+npm run typecheck   # tsc --noEmit over src + tests + shims
+npm run build       # tsc -> dist + copies governed-schema JSON into dist
+npm test            # builds first (pretest), then vitest run
+npm run codegen     # regenerate src/generated from src/governed-schema
 ```
 
-**Expected outcomes**: TypeScript compiles without errors. Tests are placeholder (exit 0).
+## Rules
 
----
-
-## Run Locally / Dev Workflow
-
-This repo has no dev server. Typical workflow:
-
-1. Edit agent templates in `templates/` or `agents/`
-2. Update factory manifests
-3. Run `npm run build` to compile TypeScript
-4. Test templates by instantiating them in target repos
-
----
-
-## Architecture Overview
-
-**Purpose**: Define how agents/droids are minted, configured, and orchestrated via Factory.
-
-**Key directories**:
-- `templates/` — Agent templates and boilerplates
-- `agents/` — Agent definitions and manifests
-- `factory/` — Factory orchestration logic
-- `.afi-codex.json` — This repo's Codex metadata
-
-**Consumed by**: afi-core, afi-reactor, and agent deployment workflows.
-
----
-
-## Security
-
-- **Template injection risks**: Agent templates are executed by droids. Validate all template variables.
-- **No secrets in templates**: Use environment variables or secure vaults.
-- **Factory manifests are contracts**: Changes can affect agent behavior system-wide.
-
----
-
-## Git Workflows
-
-- **Base branch**: `main` or `migration/multi-repo-reorg`
-- **Branch naming**: `feat/`, `fix/`, `docs/`, `refactor/`
-- **Commit messages**: Conventional commits (e.g., `feat(templates): add validator agent template`)
-- **Before committing**: Run `npm run build && npm run typecheck`
-
----
-
-## Conventions & Patterns
-
-- **Language**: TypeScript (ESM)
-- **Style**: Follow existing patterns in templates
-- **Template naming**: kebab-case (e.g., `validator-agent.yaml`)
-- **Manifest format**: YAML or JSON
-
----
-
-## Scope & Boundaries for Agents
-
-**Allowed**:
-- Add or modify factory templates and manifests when requested
-- Improve template documentation
-- Add new agent archetypes (validator, scorer, mentor, etc.)
-- Update factory orchestration logic with clear spec
-
-**Forbidden**:
-- Introduce new external service dependencies without clear explanation
-- Change template contracts that break existing agent deployments
-- Add runtime logic that belongs in afi-core or afi-reactor
-- Hardcode secrets or production URLs in templates
-
-**When unsure**: Propose changes in PR with clear rationale. Prefer extending templates over replacing them.
-
----
-
-**Last Updated**: 2025-11-26  
-**Maintainers**: AFI Factory Team  
-**Charter**: `afi-config/codex/governance/droids/AFI_DROID_CHARTER.v0.1.md`
-
+- **Conform to the vendored contracts exactly.** If a contract must change,
+  that is an afi-config change under governance — not a local edit.
+- **Hashing is KAT-pinned.** Any change to `src/canonical-json.ts` must keep
+  all six vendored KAT vectors passing byte-exactly.
+- **Fail closed.** No demo/mock/synthetic fallbacks anywhere (D-FCP-8); an
+  unknown plugin identity is an error; hashing refuses invalid artifacts.
+- **hashes.json is a pin.** Downstream waves rely on the committed
+  manifestHash / analystConfigHash / pluginSetHash values.
+- **No executor code.** Anything that runs a pipeline belongs to afi-reactor
+  (SLOT-FCP-REACTOR), not here.

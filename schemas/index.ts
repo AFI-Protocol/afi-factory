@@ -1,4 +1,14 @@
 /**
+ * TEMPORARY SEQUENCING SHIM — kept only so afi-reactor main compiles until
+ * SLOT-FCP-REACTOR/CLEANUP; scheduled for removal under SLOT-FCP-CLEANUP;
+ * do not use.
+ *
+ * The types below describe the RETIRED ungoverned draft contracts
+ * (afi-config analyst-config/enrichment-node drafts). The governed
+ * replacements are the afi.pipeline.v1 contract family vendored under
+ * src/governed-schema/ and typed under src/generated/.
+ */
+/**
  * AFI Factory - Analyst Configuration Types
  *
  * This file defines TypeScript interfaces for analyst configurations,

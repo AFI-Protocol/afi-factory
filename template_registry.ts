@@ -1,3 +1,13 @@
+/**
+ * TEMPORARY SEQUENCING SHIM — kept only so afi-reactor main compiles until
+ * SLOT-FCP-REACTOR/CLEANUP; scheduled for removal under SLOT-FCP-CLEANUP;
+ * do not use.
+ *
+ * The hardcoded froggy analyst config below is the RETIRED placeholder shape
+ * (dormant dynamic import in afi-reactor src/dag tests). The governed
+ * replacement is the afi.analyst-strategy-config.v1 contract and the
+ * loadAndValidate library in src/.
+ */
 // This file is used to load and return agent templates.
 
 export const loadTemplate = (templateId: string) => {

@@ -7,15 +7,43 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
+      - name: Checkout (clean clone — no sibling checkouts required)
+        uses: actions/checkout@v4
+
+      # afi-config is PUBLIC; the pinned commit is the vendoring source of the
+      # governed schema closure (src/governed-schema/MANIFEST.json). The drift
+      # test byte-compares every vendored file against it.
+      - name: Checkout pinned afi-config (governed-schema drift source)
+        uses: actions/checkout@v4
+        with:
+          repository: AFI-Protocol/afi-config
+          ref: e462c4e8bef5fda946ca19a826f5c53c6d202151
+          path: _afi-config
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test --if-present
+
+      - name: Install (npm ci, clean clone)
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build (dist + bin)
+        run: npm run build
+
+      # Full suite: governed-schema drift guard (sha256 pins + byte-equality vs
+      # the pinned checkout), hashing KATs, semantic graph validation, template
+      # instantiation, official-artifact hash pins (stability across runs), CLI
+      # behaviour (nonzero-on-invalid, --json), codegen freshness, and the
+      # no-dangling-references guard.
+      - name: Test
+        env:
+          AFI_CONFIG_DIR: ${{ github.workspace }}/_afi-config
+        run: npm test
