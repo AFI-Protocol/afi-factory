@@ -212,6 +212,21 @@ export function pipelineGraphViolations(p: unknown): ValidationIssue[] {
       issue(`/nodes/${i}/failurePolicy`, `failurePolicy 'degrade' requires explicit critical:false`);
   });
 
+  // providerInstanceRef (PBF-GOV D-PBF-4): a non-secret reference to a
+  // provider-instance that supplies a CATEGORY lane. It is admissible only on
+  // the five analysis categories — never on the structured merge join or the
+  // single scorer seam (a provider instance configures one analysis category,
+  // not the join/scoring stages). The schema already forbids it from carrying a
+  // credential value; this is the category-compatibility check.
+  nodes.forEach((n, i) => {
+    if (n.providerInstanceRef && (n.category === 'merge' || n.category === 'scorer')) {
+      issue(
+        `/nodes/${i}/providerInstanceRef`,
+        `providerInstanceRef is not admissible on a '${n.category}' node (a provider instance supplies an analysis category only)`
+      );
+    }
+  });
+
   return v;
 }
 

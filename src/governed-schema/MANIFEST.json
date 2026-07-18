@@ -1,11 +1,11 @@
 {
   "$comment": "Provenance of the vendored governed schema closure (afi-infra governed-schema discipline). Each vendored file is a byte-identical copy of afi-config@afiConfigCommit at afiConfigPath. Enforced by tests/governed-schema-drift.test.ts: the sha256 pins are verified on EVERY test run, and byte-equality against a pinned afi-config checkout is verified whenever AFI_CONFIG_DIR is provided (CI always provides it). Do not hand-edit; re-vendor only from an owner-approved afi-config commit.",
   "afiConfigRepo": "https://github.com/AFI-Protocol/afi-config",
-  "afiConfigCommit": "f91ce4465b9c54bc221ba82e7a468544ffcf3fe3",
+  "afiConfigCommit": "faa6a8a3d387a573c24f0421c02d806044a22d9e",
   "sources": {
     "src/governed-schema/pipeline.schema.json": {
       "afiConfigPath": "schemas/pipeline/v1/pipeline.schema.json",
-      "sha256": "f3f25bfbcf41c585c519f9931f79dfd7e91d1138bf703e9d7770f53ff83120d3"
+      "sha256": "0d0c1e74f201f518ed37ce938a932df41e1ea1343c1c8814c809ca117a9f7a2a"
     },
     "src/governed-schema/pipeline-template.schema.json": {
       "afiConfigPath": "schemas/pipeline-template/v1/pipeline-template.schema.json",
