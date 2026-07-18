@@ -17,6 +17,8 @@ export interface NodeRow {
   retryDelayMs?: number;
   backoff?: string;
   config?: unknown;
+  /** Non-secret provider-instance reference (identity + version only; PBF-GOV D-PBF-4). */
+  providerInstanceRef?: { providerInstanceId: string; recordVersion: string };
 }
 
 export interface JoinSummary {
@@ -97,6 +99,7 @@ export function inspectPipeline(p: PipelineManifest): PipelineInspection {
       ...(n.retryDelayMs !== undefined ? { retryDelayMs: n.retryDelayMs } : {}),
       ...(n.backoff !== undefined ? { backoff: n.backoff } : {}),
       ...(n.config !== undefined ? { config: n.config } : {}),
+      ...(n.providerInstanceRef !== undefined ? { providerInstanceRef: n.providerInstanceRef } : {}),
     })),
     joins: p.nodes
       .filter((n) => n.join)

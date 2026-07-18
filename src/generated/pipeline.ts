@@ -147,6 +147,7 @@ export interface Node {
    */
   resourceLimits?: {};
   join?: Join;
+  providerInstanceRef?: ProviderInstanceRef;
 }
 /**
  * REQUIRED on (and only on) nodes with more than one incoming edge (x-afiConstraints.joinDeclaration). Declares the deterministic all-parents join and merge rule.
@@ -169,6 +170,19 @@ export interface Join {
      */
     conflictRule: string;
   };
+}
+/**
+ * OPTIONAL non-secret reference to a versioned provider instance (afi.provider-instance.v1) that supplies this category node's implementation (x-afiConstraints.providerInstanceRef). Identity + version ONLY — NEVER a credential value, secret, endpoint URL, or CredentialRef payload. Resolved BELOW the node by the runtime provider-adapter layer against deployment-local provider-instance configuration. Absent for in-registry keyless plugin nodes.
+ */
+export interface ProviderInstanceRef {
+  /**
+   * Stable id of the referenced afi.provider-instance.v1 record (deployment-local; not resolved in this contract).
+   */
+  providerInstanceId: string;
+  /**
+   * Exact semver of the referenced provider-instance record, version-pinned for deterministic composition.
+   */
+  recordVersion: string;
 }
 export interface Edge {
   /**
