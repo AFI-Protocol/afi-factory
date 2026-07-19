@@ -9,7 +9,7 @@
       "id": "technical",
       "category": "technical",
       "pluginId": "afi-analysis-technical",
-      "pluginVersion": "1.0.0",
+      "pluginVersion": "2.0.0",
       "config": { "candleLimit": 200 }
     },
     {

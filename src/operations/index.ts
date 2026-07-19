@@ -25,8 +25,8 @@ export {
   readWorkspaceJson,
 } from './workspace.js';
 export {
-  listBundledTemplateDirs,
-  loadBundledTemplate,
-  loadAllBundledTemplates,
-  type BundledTemplate,
+  listBundledOfficialDirs,
+  loadBundledOfficial,
+  loadAllBundledOfficial,
+  type BundledOfficialArtifacts,
 } from './assets.js';

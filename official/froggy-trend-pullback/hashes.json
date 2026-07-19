@@ -1,0 +1,27 @@
+{
+  "$comment": "Canonical hashes of the official froggy-trend-pullback composition artifacts (pipeline v1.3.0, EV3-GOV D-EV3-5(1)), computed by the afi-factory hasher (canonical-json-hashing.v1; domain tags per D-FCP-7). The artifacts are byte-identical copies of the afi-config@afiConfigCommit registry records; the values below equal the pins carried by the canonical analyst-strategy config/registration and the runtime composition provenance. Recomputed and asserted byte-equal by tests/official-artifacts.test.ts — downstream waves pin these values.",
+  "afiConfigCommit": "9497afc24bf380b21701bee453c13ebdf8881a26",
+  "artifacts": {
+    "pipelineManifest": "official/froggy-trend-pullback/pipeline.manifest.json",
+    "analystConfig": "official/froggy-trend-pullback/analyst-config.json",
+    "plugins": "official/froggy-trend-pullback/plugins"
+  },
+  "manifestHash": {
+    "algorithm": "sha256",
+    "canonicalizationVersion": "afi.hash.v1",
+    "domainTag": "afi.d2.composition-manifest",
+    "value": "df3372dadaca1595d0e6d2f6bad9464ccc9abb7106e9f5b7111df148a145bc4f"
+  },
+  "analystConfigHash": {
+    "algorithm": "sha256",
+    "canonicalizationVersion": "afi.hash.v1",
+    "domainTag": "afi.d2.analyst-config",
+    "value": "e34471dec8dd3b8fcf0e5576765e469aec1a89f77af6b693ef3c06fc4200bbad"
+  },
+  "pluginSetHash": {
+    "algorithm": "sha256",
+    "canonicalizationVersion": "afi.hash.v1",
+    "domainTag": "afi.d2.plugin-set",
+    "value": "5384e1c08ce4bd7f533acc15487df81d7d37b6615d109d611bde968a81f2f386"
+  }
+}

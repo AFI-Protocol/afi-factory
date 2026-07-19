@@ -82,7 +82,7 @@ describe('operation registry', () => {
         'factory.template.inspect',
         'factory.template.instantiate',
         'factory.template.validate',
-        'factory.templates.list',
+        'factory.official.list',
       ].sort()
     );
   });

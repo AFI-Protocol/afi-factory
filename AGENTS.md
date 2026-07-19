@@ -34,11 +34,12 @@ contracts — those live in afi-config.
 - `src/agent/` — projections over the registry: the deterministic capability
   catalog (`catalog.ts`), the generic framework-neutral tool definitions
   (`tools.ts`), and the MCP-compatible stdio adapter (`mcp.ts`, transport only).
-- `templates/official/froggy-trend-pullback/` — the official template, its
-  instantiated canonical manifest, the seven official plugin manifests, the
-  official analyst-config, and `hashes.json` (committed canonical hashes that
-  downstream waves pin — regenerate only together with the artifacts and only
-  when the change is authorized).
+- `official/froggy-trend-pullback/` — the official composition artifacts:
+  BYTE-IDENTICAL copies of the canonical afi-config registry records (the
+  registered v1.3.0 pipeline manifest, the canonical analyst-config, the seven
+  bound plugin manifests) plus `hashes.json` (committed canonical hashes that
+  downstream waves pin — re-vendor only from an owner-approved afi-config
+  commit, together, and only when the change is authorized).
 - `fixtures/conformance/` — the eight configurability proof graphs
   (non-production).
 - `tests/` — vitest: drift guard, hashing KATs, semantic validation mirror,

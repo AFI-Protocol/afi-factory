@@ -40,7 +40,7 @@ describe('no dangling references', () => {
   });
 
   it('official hashes.json artifact paths resolve', () => {
-    const hashes = readJson<any>(join(repoRoot, 'templates', 'official', 'froggy-trend-pullback', 'hashes.json'));
+    const hashes = readJson<any>(join(repoRoot, 'official', 'froggy-trend-pullback', 'hashes.json'));
     for (const p of Object.values<string>(hashes.artifacts)) mustExist(join(repoRoot, p), 'hashes.json artifacts');
   });
 

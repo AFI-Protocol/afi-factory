@@ -23,7 +23,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 describe('guardrails', () => {
   it('no committed static capability-catalog manifest (the catalog is generated from the registry)', () => {
     const staticCatalogs = walk(join(repoRoot, 'src'))
-      .concat(walk(join(repoRoot, 'templates')))
+      .concat(walk(join(repoRoot, 'official')))
       .filter((f) => f.endsWith('.json') && /(^|\/)(capabilit|catalog|skills?)[^/]*\.json$/i.test(f));
     expect(staticCatalogs).toEqual([]);
   });

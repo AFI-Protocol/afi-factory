@@ -24,7 +24,7 @@ import type { PipelineTemplate } from '../generated/pipeline-template.js';
 import type { AnalysisPluginManifest } from '../generated/analysis-plugin.js';
 import type { AnalystStrategyConfig } from '../generated/analyst-strategy-config.js';
 import { skeletonTemplate, skeletonAnalystConfig, slotsToStrings } from '../authoring.js';
-import { loadAllBundledTemplates, loadBundledTemplate, listBundledTemplateDirs } from './assets.js';
+import { loadAllBundledOfficial, loadBundledOfficial, listBundledOfficialDirs } from './assets.js';
 import { ERROR_CODES, OperationFailure } from './errors.js';
 import { canonicalWorkspaceRoot, writeWorkspaceJson, writeWorkspaceText } from './workspace.js';
 import type { OperationContext, OperationDef } from './types.js';
@@ -137,17 +137,17 @@ const DOMAIN_OPERATION_LITERALS = [
   // ---------------------------------------------------------- plugins.list
   {
     operationId: 'factory.plugins.list',
-    operationVersion: '1.0.0',
+    operationVersion: '1.1.0',
     name: 'List pipeline components',
     description:
-      'Discover the analysis-plugin components composable into an AFI pipeline (from a supplied plugin set or Factory’s bundled official templates), with each plugin’s category, version, schema refs, determinism, params schema, multiInstance, and mayFeedScorer.',
+      'Discover the analysis-plugin components composable into an AFI pipeline (from a supplied plugin set or Factory’s bundled official composition artifacts), with each plugin’s category, version, schema refs, determinism, params schema, multiInstance, and mayFeedScorer.',
     mutation: 'read-only',
     determinism: 'deterministic',
     fsPolicy: {
       readsWorkspace: false,
       writesWorkspace: false,
       readsBundledAssets: true,
-      notes: 'Reads Factory’s bundled official-template plugin manifests when no plugin set is supplied.',
+      notes: 'Reads Factory’s bundled official composition plugin manifests when no plugin set is supplied.',
     },
     inputSchema: {
       $schema: 'http://json-schema.org/draft-07/schema#',
@@ -155,7 +155,7 @@ const DOMAIN_OPERATION_LITERALS = [
       additionalProperties: false,
       properties: {
         plugins: { ...ARTIFACT_ARRAY, description: 'Inline analysis-plugin manifests to describe (validated).' },
-        templateDir: { type: 'string', description: 'Bundled official template id whose plugin set to list.' },
+        officialDir: { type: 'string', description: 'Bundled official composition id whose plugin set to list.' },
       },
     },
     outputSchema: {
@@ -169,23 +169,23 @@ const DOMAIN_OPERATION_LITERALS = [
         analysisCategories: { type: 'array', items: { type: 'string' } },
       },
     },
-    handler: (input: { plugins?: unknown; templateDir?: string }) => {
+    handler: (input: { plugins?: unknown; officialDir?: string }) => {
       let plugins: AnalysisPluginManifest[];
       if (input.plugins !== undefined) {
         plugins = validatePluginSet(input.plugins) as AnalysisPluginManifest[];
-      } else if (input.templateDir !== undefined) {
-        const bundled = loadBundledTemplate(input.templateDir);
+      } else if (input.officialDir !== undefined) {
+        const bundled = loadBundledOfficial(input.officialDir);
         if (!bundled) {
           throw new OperationFailure(
-            ERROR_CODES.UNKNOWN_TEMPLATE,
-            `no bundled template '${input.templateDir}' (have: ${listBundledTemplateDirs().join(', ') || 'none'})`
+            ERROR_CODES.UNKNOWN_OFFICIAL,
+            `no bundled official composition '${input.officialDir}' (have: ${listBundledOfficialDirs().join(', ') || 'none'})`
           );
         }
         plugins = bundled.plugins;
       } else {
         // Default: the union of all bundled official plugins, deduped by id@version.
         const seen = new Map<string, AnalysisPluginManifest>();
-        for (const t of loadAllBundledTemplates()) {
+        for (const t of loadAllBundledOfficial()) {
           for (const p of t.plugins) seen.set(`${p.pluginId}@${p.pluginVersion}`, p);
         }
         plugins = [...seen.values()].sort((a, b) =>
@@ -200,19 +200,20 @@ const DOMAIN_OPERATION_LITERALS = [
     },
   },
 
-  // -------------------------------------------------------- templates.list
+  // --------------------------------------------------------- official.list
   {
-    operationId: 'factory.templates.list',
+    operationId: 'factory.official.list',
     operationVersion: '1.0.0',
-    name: 'List bundled templates',
-    description: 'List the official pipeline templates bundled with Factory, with their identity, parameters, and component counts.',
+    name: 'List bundled official compositions',
+    description:
+      'List the official composition artifact sets bundled with Factory (byte-identical copies of the canonical afi-config registry records), with their pipeline identity, analyst-strategy identity, canonical hash pins, and component counts.',
     mutation: 'read-only',
     determinism: 'deterministic',
     fsPolicy: {
       readsWorkspace: false,
       writesWorkspace: false,
       readsBundledAssets: true,
-      notes: 'Reads Factory’s bundled templates/official/ directory.',
+      notes: 'Reads Factory’s bundled official/ directory.',
     },
     inputSchema: {
       $schema: 'http://json-schema.org/draft-07/schema#',
@@ -223,20 +224,24 @@ const DOMAIN_OPERATION_LITERALS = [
     outputSchema: {
       $schema: 'http://json-schema.org/draft-07/schema#',
       type: 'object',
-      required: ['templates'],
+      required: ['official'],
       additionalProperties: false,
-      properties: { templates: { type: 'array', items: { type: 'object' } } },
+      properties: { official: { type: 'array', items: { type: 'object' } } },
     },
     handler: () => ({
-      templates: loadAllBundledTemplates().map((t) => ({
-        templateDir: t.templateDir,
-        templateId: t.template.templateId,
-        templateVersion: t.template.templateVersion,
-        pipelineId: t.template.pipelineId,
-        pipelineVersion: t.template.pipelineVersion,
-        description: t.template.description,
-        parameterNames: (t.template.parameters ?? []).map((p) => p.name),
-        nodeCount: t.template.nodes.length,
+      official: loadAllBundledOfficial().map((t) => ({
+        officialDir: t.officialDir,
+        pipelineId: t.manifest.pipelineId,
+        pipelineVersion: t.manifest.pipelineVersion,
+        description: t.manifest.description,
+        analystId: t.analystConfig.analystId,
+        strategyId: t.analystConfig.strategyId,
+        strategyVersion: t.analystConfig.strategyVersion,
+        afiConfigCommit: t.hashes.afiConfigCommit,
+        manifestHash: t.hashes.manifestHash,
+        analystConfigHash: t.hashes.analystConfigHash,
+        pluginSetHash: t.hashes.pluginSetHash,
+        nodeCount: t.manifest.nodes.length,
         pluginCount: t.plugins.length,
       })),
     }),

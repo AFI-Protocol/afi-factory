@@ -111,9 +111,9 @@ export {
   resolveWriteTarget,
   resolveReadTarget,
   readWorkspaceJson,
-  loadAllBundledTemplates,
-  loadBundledTemplate,
-  listBundledTemplateDirs,
+  loadAllBundledOfficial,
+  loadBundledOfficial,
+  listBundledOfficialDirs,
   type OperationDef,
   type OperationResult,
   type OperationError,
@@ -123,7 +123,7 @@ export {
   type Determinism,
   type FsPolicy,
   type ErrorCode,
-  type BundledTemplate,
+  type BundledOfficialArtifacts,
 } from './operations/index.js';
 
 export {
