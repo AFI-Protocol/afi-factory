@@ -18,8 +18,8 @@ export const ERROR_CODES = {
   VALIDATION_FAILED: 'validation_failed',
   /** A requested analysis-plugin category is not one Factory recognizes. */
   UNKNOWN_CATEGORY: 'unknown_category',
-  /** A requested bundled template id does not exist. */
-  UNKNOWN_TEMPLATE: 'unknown_template',
+  /** A requested bundled official composition id does not exist. */
+  UNKNOWN_OFFICIAL: 'unknown_official',
   /** A mutating operation was invoked without a workspace. */
   WORKSPACE_REQUIRED: 'workspace_required',
   /** A resolved path escaped the approved workspace root (traversal/symlink/absolute). */

@@ -1,14 +1,14 @@
 {
   "schema": "afi.analysis-plugin.v1",
   "pluginId": "afi-analysis-sentiment",
-  "pluginVersion": "1.0.0",
-  "implementationVersion": "1.0.0",
+  "pluginVersion": "2.0.0",
+  "implementationVersion": "2.0.0",
   "category": "sentiment",
-  "description": "Official perp-market sentiment plugin manifest: derives funding/positioning sentiment features from the Coinalyze provider. External provider call — NOT deterministic; requires the COINALYZE_API_KEY secret class in the operator environment.",
+  "description": "Official sentiment lane plugin manifest (vendor-neutral, provider-instance-backed): the node reads its explicit providerInstanceRef, and the runtime provider layer resolves the instance and invokes the trusted registered sentiment adapter (keyless or header-BYOK per the selected instance's provider). The node contains no vendor logic and no credential access; external provider calls are NOT deterministic.",
   "inputSchemaRef": "afi.usignal.v1.1",
   "outputSchemaRef": "afi.enrichment.sentiment.v1",
   "deterministic": false,
-  "capabilities": ["provider:coinalyze", "secret:COINALYZE_API_KEY"],
+  "capabilities": ["provider:instance-backed"],
   "defaultTimeoutMs": 10000,
   "defaultRetryPolicy": {
     "maxRetries": 2,

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { officialDir, conformanceDir, readJson, officialPlugins, clone } from './helpers.js';
+import { officialDir, conformanceDir, readJson, officialPlugins, proofTemplate, clone } from './helpers.js';
 import { invokeOperation, readWorkspaceJson } from '../src/index.js';
 import { executeOperation } from '../src/operations/registry.js';
 import type { OperationDef } from '../src/index.js';
@@ -13,8 +13,8 @@ import type { OperationDef } from '../src/index.js';
  * governed schema closure. Failures are structured and precise.
  */
 
-const froggyTemplate = readJson<any>(join(officialDir, 'template.json'));
 const froggyManifest = readJson<any>(join(officialDir, 'pipeline.manifest.json'));
+const froggyAnalystConfig = readJson<any>(join(officialDir, 'analyst-config.json'));
 const froggyHashes = readJson<any>(join(officialDir, 'hashes.json'));
 const plugins = officialPlugins();
 const fixture01 = readJson<any>(join(conformanceDir, '01-one-category.json'));
@@ -27,7 +27,7 @@ async function ok(id: string, input?: unknown, ctx?: unknown) {
 }
 
 describe('Workflow A — inspect', () => {
-  it('lists capabilities, plugins, templates; inspects Froggy; returns canonical identity', async () => {
+  it('lists capabilities, plugins, official compositions; inspects Froggy; returns canonical identity', async () => {
     const caps = await ok('factory.capabilities.list');
     expect(caps.operations.length).toBe(14);
 
@@ -35,12 +35,19 @@ describe('Workflow A — inspect', () => {
     expect(comps.analysisCategories).toEqual(['technical', 'pattern', 'sentiment', 'news', 'aiMl']);
     expect(comps.components.length).toBeGreaterThan(0);
 
-    const tmpl = await ok('factory.templates.list', {});
-    expect(tmpl.templates.map((t: any) => t.templateDir)).toContain('froggy-trend-pullback');
+    const official = await ok('factory.official.list', {});
+    const froggy = official.official.find((o: any) => o.officialDir === 'froggy-trend-pullback');
+    expect(froggy).toMatchObject({
+      pipelineId: 'froggy-trend-pullback',
+      pipelineVersion: 'v1.3.0',
+      analystId: 'froggy',
+      strategyId: 'trend_pullback_v1',
+    });
+    expect(froggy.manifestHash.value).toBe(froggyHashes.manifestHash.value);
 
-    const inspection = (await ok('factory.template.inspect', { template: froggyTemplate })).inspection;
+    const inspection = (await ok('factory.pipeline.inspect', { pipeline: froggyManifest })).inspection;
     expect(inspection.executionOrder[0]).toBe('technical');
-    expect(inspection.waves.length).toBeGreaterThan(1); // parallel branches
+    expect(inspection.waves.length).toBeGreaterThan(1); // parallel lanes
     expect(inspection.nodes.some((n: any) => n.category === 'scorer')).toBe(true);
 
     const hash = (await ok('factory.artifact.hash', { artifact: froggyManifest, kind: 'pipeline' })).hash;
@@ -65,10 +72,11 @@ describe('Workflow B — create and validate', () => {
 });
 
 describe('Workflow C — instantiate and package', () => {
-  it('instantiates Froggy, validates, produces an analyst-config, hashes, and packages a deployable bundle', async () => {
-    const inst = await ok('factory.template.instantiate', { template: froggyTemplate, params: {}, plugins });
+  it('instantiates the proof template, validates, and produces an analyst-config (values-only templating)', async () => {
+    const inst = await ok('factory.template.instantiate', { template: proofTemplate(), params: {}, plugins });
     expect(inst.valid).toBe(true);
-    expect(inst.manifestHash.value).toBe(froggyHashes.manifestHash.value);
+    const again = await ok('factory.template.instantiate', { template: proofTemplate(), params: {}, plugins });
+    expect(inst.manifestHash.value).toBe(again.manifestHash.value); // deterministic identity
     const manifest = inst.pipeline;
 
     const v = await ok('factory.pipeline.validate', { pipeline: manifest, plugins });
@@ -77,20 +85,24 @@ describe('Workflow C — instantiate and package', () => {
     const created = await ok('factory.analystConfig.create', { pipeline: manifest });
     expect(created.valid).toBe(true);
     expect(created.analystConfigHash).toBeDefined();
+  });
 
+  it('packages the official provider-backed composition into a deployable bundle carrying the canonical hashes', async () => {
     const pluginSetHash = (await ok('factory.artifact.hash', { artifact: plugins, kind: 'plugin-set' })).hash;
     expect(pluginSetHash.value).toBe(froggyHashes.pluginSetHash.value);
 
     const ws = mkdtempSync(join(tmpdir(), 'afi-pkg-'));
     const pkg = await ok(
       'factory.artifact.package',
-      { pipeline: manifest, analystConfig: created.config, plugins, dir: 'bundle' },
+      { pipeline: froggyManifest, analystConfig: froggyAnalystConfig, plugins, dir: 'bundle' },
       { workspace: { root: ws } }
     );
     expect(pkg.written).toContain('bundle/pipeline.manifest.json');
     expect(pkg.written).toContain('bundle/analyst-config.json');
     expect(pkg.written).toContain('bundle/hashes.json');
     expect(pkg.hashes.manifestHash.value).toBe(froggyHashes.manifestHash.value);
+    expect(pkg.hashes.analystConfigHash.value).toBe(froggyHashes.analystConfigHash.value);
+    expect(pkg.hashes.pluginSetHash.value).toBe(froggyHashes.pluginSetHash.value);
 
     // The packaged manifest re-validates against the governed contract.
     const written = readWorkspaceJson(ws, 'bundle/pipeline.manifest.json');
@@ -132,7 +144,7 @@ describe('Workflow D — failure honesty', () => {
 
   it('unreachable node -> validation failure', async () => {
     const bad = clone(fixture01);
-    bad.nodes.push({ id: 'orphan', category: 'pattern', pluginId: 'afi-analysis-pattern', pluginVersion: '1.0.0' });
+    bad.nodes.push({ id: 'orphan', category: 'pattern', pluginId: 'afi-analysis-pattern', pluginVersion: '2.0.0' });
     const r = await ok('factory.pipeline.validate', { pipeline: bad });
     expect(r.valid).toBe(false);
   });
@@ -154,7 +166,7 @@ describe('Workflow D — failure honesty', () => {
   });
 
   it('invalid template parameter -> instantiation failure', async () => {
-    const r = await ok('factory.template.instantiate', { template: froggyTemplate, params: { candleLimit: 0 }, plugins });
+    const r = await ok('factory.template.instantiate', { template: proofTemplate(), params: { candleLimit: 0 }, plugins });
     expect(r.valid).toBe(false);
     expect(JSON.stringify(r.errors)).toMatch(/candleLimit/);
   });

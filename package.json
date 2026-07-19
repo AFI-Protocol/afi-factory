@@ -18,7 +18,7 @@
   "files": [
     "dist",
     "src",
-    "templates",
+    "official",
     "fixtures",
     "docs",
     "README.md",

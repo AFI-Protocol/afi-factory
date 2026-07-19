@@ -12,7 +12,7 @@ the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
   closed) into concrete `afi.pipeline.v1` manifests.
 - **Manifest validation** — strict AJV validation against the **vendored,
   byte-pinned** afi-config contract closure (`src/governed-schema/`, pinned to
-  afi-config `f91ce4465b9c54bc221ba82e7a468544ffcf3fe3`), plus the semantic
+  afi-config `9497afc24bf380b21701bee453c13ebdf8881a26`), plus the semantic
   graph layer the schemas delegate to tooling: unique node ids, known edge
   endpoints, Kahn acyclicity, exactly one non-bypassable scorer sink,
   join-declaration rules, `prefer:` parent checks, condition-path
@@ -100,26 +100,24 @@ npm ci && npm run build
 
 # validate the official manifest against the official plugin set
 npx afi-factory pipeline validate \
-  templates/official/froggy-trend-pullback/pipeline.manifest.json \
-  --plugins templates/official/froggy-trend-pullback/plugins
+  official/froggy-trend-pullback/pipeline.manifest.json \
+  --plugins official/froggy-trend-pullback/plugins
 
 # inspect the graph (waves, node table, joins)
 npx afi-factory pipeline inspect \
-  templates/official/froggy-trend-pullback/pipeline.manifest.json
+  official/froggy-trend-pullback/pipeline.manifest.json
 
-# instantiate the official template (defaults) and hash the result
-npx afi-factory template instantiate \
-  templates/official/froggy-trend-pullback/template.json \
-  --plugins templates/official/froggy-trend-pullback/plugins --out /tmp/froggy.json
-npx afi-factory hash /tmp/froggy.json --kind pipeline --json
+# hash the official manifest (matches the canonical composition pin)
+npx afi-factory hash official/froggy-trend-pullback/pipeline.manifest.json \
+  --kind pipeline --json
 
 # cross-validate the analyst config against its pinned manifest
 npx afi-factory analyst-config validate \
-  templates/official/froggy-trend-pullback/analyst-config.json \
-  --pipeline templates/official/froggy-trend-pullback/pipeline.manifest.json \
-  --plugins templates/official/froggy-trend-pullback/plugins
+  official/froggy-trend-pullback/analyst-config.json \
+  --pipeline official/froggy-trend-pullback/pipeline.manifest.json \
+  --plugins official/froggy-trend-pullback/plugins
 
-# start a new pipeline project
+# start a new pipeline project (scaffolds a value-parameterized template)
 npx afi-factory init my-pipeline-project
 ```
 
@@ -164,8 +162,10 @@ plain string comparison) — order-insensitive by construction, and sensitive to
 implementation upgrades via `implementationVersion`.
 
 The committed hashes of the official artifacts live in
-[`templates/official/froggy-trend-pullback/hashes.json`](templates/official/froggy-trend-pullback/hashes.json)
-and are recomputed + asserted by CI on every run — downstream waves pin them.
+[`official/froggy-trend-pullback/hashes.json`](official/froggy-trend-pullback/hashes.json)
+and are recomputed + asserted by CI on every run — they equal the pins carried
+by the canonical analyst-strategy registration and the runtime composition
+provenance, and downstream waves pin them.
 
 ## Failure surfacing
 
@@ -196,19 +196,29 @@ declared dependency structure only:
   optional/conditional flags;
 - **condition summary** — operators and paths per gated edge.
 
-## Official template: froggy-trend-pullback
+## Official composition: froggy-trend-pullback v1.3.0
 
-[`templates/official/froggy-trend-pullback/`](templates/official/froggy-trend-pullback/)
-carries the program's fixed 7-node design: a `technical` entry fanning out to
-`pattern` (via the `candles` port), `sentiment`, and `news` branches; a
-deterministic `namespace-by-node` merge (all four join edges `optional:true` —
-degraded parents contribute empty namespaces); `aiMl` augmentation of the
-merged view; and the single `afi-scorer-froggy-trend-pullback` sink. The
-governed pipeline contract requires a **single entry with full reachability**,
-so the design's "sentiment/news as additional roots" is expressed as fan-out
-edges from the technical entry — sentiment, news, and pattern still execute
-concurrently (wave 1 of the Kahn levels), which is the same parallel-roots
-execution shape.
+[`official/froggy-trend-pullback/`](official/froggy-trend-pullback/) carries
+**byte-identical copies of the canonical afi-config registry records** for the
+current official composition on the five-lane provider runtime: the registered
+pipeline manifest `froggy-trend-pullback v1.3.0`, the canonical
+analyst-strategy config, the seven bound plugin manifests, and the committed
+canonical hash pins (`hashes.json`).
+
+The v1.3.0 graph: a `technical` entry fanning out to `pattern` (via the
+`candles` port), `sentiment`, and `news`; the `aiMl` lane joining the four
+sibling lane outputs; one deterministic five-category `namespace-by-node`
+merge; and the single `afi-scorer-froggy-trend-pullback` sink. Every category
+lane selects its provider through an explicit `providerInstanceRef` (the
+all-five keyless/self-hosted reference profile; the `aiMl` lane pins the
+Tiny Brains provider-instance record 1.1.0), and **all five lanes are
+required**: the lanes are fail-fast under the governed default — a failed
+lane yields no scored evaluation.
+
+Because provider selection is authored at the **manifest** layer and templates
+parameterize *values, never topology or provider selection*, the official
+provider-backed composition is not template-produced: Factory vendors the
+canonical records directly and validates, hashes, inspects, and packages them.
 
 The eight configurability proof graphs live under
 [`fixtures/conformance/`](fixtures/conformance/) — clearly non-production

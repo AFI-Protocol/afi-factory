@@ -18,7 +18,8 @@ npm test      # full suite: drift guard, hashing KATs, semantics, CLI behaviour
 contracts are **vendored and byte-pinned** in `src/governed-schema/`
 (provenance in `MANIFEST.json`). To additionally byte-verify the vendored
 closure against a pinned afi-config checkout (CI always does), set
-`AFI_CONFIG_DIR=/path/to/afi-config@f91ce446` before `npm test`.
+`AFI_CONFIG_DIR=/path/to/afi-config@<pinned commit>` before `npm test` (the
+pinned commit is `afiConfigCommit` in `src/governed-schema/MANIFEST.json`).
 
 ## Day-to-day commands
 
@@ -37,11 +38,14 @@ codes over any summary text.
 ## What capabilities mean for you
 
 Plugin manifests declare **requirement classes** the runtime environment must
-satisfy — e.g. the official froggy set needs `provider:price-feed`,
-`provider:coinalyze` + `secret:COINALYZE_API_KEY`, `provider:newsdata` +
-`secret:NEWSDATA_API_KEY`, and `service:tiny-brains`. Factory only surfaces
-these declarations; provisioning the actual providers/secrets is runtime
-operator configuration (afi-reactor side), never stored in any artifact.
+satisfy. The official froggy set's five category-lane plugins each declare
+`provider:instance-backed`: the concrete provider is selected per lane by the
+manifest's explicit `providerInstanceRef` (the committed refs form the
+all-five keyless/self-hosted reference profile; the `aiMl` lane pins the
+Tiny Brains provider instance). Factory only surfaces these declarations and
+non-secret references; resolving instances and any operator credentials (BYOK)
+is runtime operator configuration (afi-reactor side), never stored in any
+artifact.
 
 ## Failure posture
 

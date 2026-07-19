@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { repoRoot, officialDir, conformanceDir, readJson, clone } from './helpers.js';
+import { repoRoot, officialDir, conformanceDir, readJson, proofTemplate, clone } from './helpers.js';
 import { validateDocument } from '../src/index.js';
 
 /**
@@ -15,7 +15,6 @@ import { validateDocument } from '../src/index.js';
 
 const cliPath = join(repoRoot, 'dist', 'cli', 'index.js');
 const manifestPath = join(officialDir, 'pipeline.manifest.json');
-const templatePath = join(officialDir, 'template.json');
 const analystConfigPath = join(officialDir, 'analyst-config.json');
 const pluginsDir = join(officialDir, 'plugins');
 const hashes = readJson<any>(join(officialDir, 'hashes.json'));
@@ -109,44 +108,56 @@ describe('pipeline inspect', () => {
 });
 
 describe('template validate / instantiate', () => {
-  it('official template validates', () => {
-    const r = cli(['template', 'validate', templatePath, '--json']);
+  function writtenTemplate(mutate?: (t: any) => void): string {
+    const t = proofTemplate();
+    mutate?.(t);
+    const file = join(tmp(), 'template.json');
+    writeFileSync(file, JSON.stringify(t, null, 2));
+    return file;
+  }
+
+  it('the proof template validates', () => {
+    const r = cli(['template', 'validate', writtenTemplate(), '--json']);
     expect(r.status).toBe(0);
     expect(JSON.parse(r.stdout).valid).toBe(true);
   });
 
-  it('instantiate with defaults reproduces the committed manifest byte-equally', () => {
+  it('instantiate with defaults emits an admissible manifest with a stable canonical hash', () => {
     const dir = tmp();
     const out = join(dir, 'out.json');
-    const r = cli(['template', 'instantiate', templatePath, '--plugins', pluginsDir, '--out', out]);
+    const file = writtenTemplate();
+    const r = cli(['template', 'instantiate', file, '--plugins', pluginsDir, '--out', out]);
     expect(r.status).toBe(0);
-    expect(JSON.parse(readFileSync(out, 'utf-8'))).toEqual(readJson(manifestPath));
-    expect(r.stdout).toContain(hashes.manifestHash.value);
+    const manifest = JSON.parse(readFileSync(out, 'utf-8'));
+    expect(manifest.schema).toBe('afi.pipeline.v1');
+    expect(manifest.nodes[0].config).toEqual({ candleLimit: 100 });
+    const again = cli(['template', 'instantiate', file, '--plugins', pluginsDir, '--json']);
+    expect(r.stdout).toContain(JSON.parse(again.stdout).manifestHash.value);
   });
 
   it('instantiate with -p overrides applies validated values', () => {
-    const r = cli(['template', 'instantiate', templatePath, '-p', 'candleLimit=250', '--json']);
+    const file = writtenTemplate();
+    const defaults = cli(['template', 'instantiate', file, '--json']);
+    const r = cli(['template', 'instantiate', file, '-p', 'candleLimit=250', '--json']);
     expect(r.status).toBe(0);
     const parsed = JSON.parse(r.stdout);
     expect(parsed.valid).toBe(true);
     expect(parsed.pipeline.nodes[0].config.candleLimit).toBe(250);
-    expect(parsed.manifestHash.value).not.toBe(hashes.manifestHash.value);
+    expect(parsed.manifestHash.value).not.toBe(JSON.parse(defaults.stdout).manifestHash.value);
   });
 
   it('instantiate fails closed on a missing required parameter', () => {
-    const dir = tmp();
-    const t = clone(readJson<any>(templatePath));
-    t.parameters[0].required = true;
-    delete t.parameters[0].default;
-    const file = join(dir, 't.json');
-    writeFileSync(file, JSON.stringify(t));
+    const file = writtenTemplate((t) => {
+      t.parameters[0].required = true;
+      delete t.parameters[0].default;
+    });
     const r = cli(['template', 'instantiate', file, '--json']);
     expect(r.status).not.toBe(0);
     expect(JSON.parse(r.stdout).valid).toBe(false);
   });
 
   it('instantiate fails closed on an ill-typed parameter value', () => {
-    const r = cli(['template', 'instantiate', templatePath, '-p', 'candleLimit=0']);
+    const r = cli(['template', 'instantiate', writtenTemplate(), '-p', 'candleLimit=0']);
     expect(r.status).not.toBe(0);
   });
 });
@@ -204,8 +215,11 @@ describe('hash', () => {
 
   it('plugin-set hash over the seven official manifests matches hashes.json', () => {
     const dir = tmp();
-    const set = ['afi-analysis-aiml', 'afi-analysis-news', 'afi-analysis-pattern', 'afi-analysis-sentiment', 'afi-analysis-technical', 'afi-merge-enriched-view', 'afi-scorer-froggy-trend-pullback']
-      .map((id) => readJson(join(pluginsDir, `${id}.plugin.json`)));
+    const set = [
+      'afi-analysis-aiml--2.0.0', 'afi-analysis-news--2.0.0', 'afi-analysis-pattern--2.0.0',
+      'afi-analysis-sentiment--2.0.0', 'afi-analysis-technical--2.0.0',
+      'afi-merge-enriched-view--1.1.0', 'afi-scorer-froggy-trend-pullback--1.0.0',
+    ].map((id) => readJson(join(pluginsDir, `${id}.json`)));
     const file = join(dir, 'set.json');
     writeFileSync(file, JSON.stringify(set));
     const r = cli(['hash', file, '--kind', 'plugin-set', '--json']);

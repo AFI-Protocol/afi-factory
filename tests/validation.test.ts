@@ -23,14 +23,14 @@ function base(): PipelineManifest {
     pipelineVersion: 'v1.0.0',
     entry: 'technical',
     nodes: [
-      { id: 'technical', category: 'technical', pluginId: 'afi-analysis-technical', pluginVersion: '1.0.0' },
-      { id: 'pattern', category: 'pattern', pluginId: 'afi-analysis-pattern', pluginVersion: '1.0.0' },
-      { id: 'sentiment', category: 'sentiment', pluginId: 'afi-analysis-sentiment', pluginVersion: '1.0.0' },
+      { id: 'technical', category: 'technical', pluginId: 'afi-analysis-technical', pluginVersion: '2.0.0' },
+      { id: 'pattern', category: 'pattern', pluginId: 'afi-analysis-pattern', pluginVersion: '2.0.0' },
+      { id: 'sentiment', category: 'sentiment', pluginId: 'afi-analysis-sentiment', pluginVersion: '2.0.0' },
       {
         id: 'merge',
         category: 'merge',
         pluginId: 'afi-merge-enriched-view',
-        pluginVersion: '1.0.0',
+        pluginVersion: '1.1.0',
         join: { policy: 'all', merge: { strategy: 'namespace-by-node', conflictRule: 'error' } },
       },
       { id: 'scorer', category: 'scorer', pluginId: 'afi-scorer-froggy-trend-pullback', pluginVersion: '1.0.0' },
@@ -106,21 +106,21 @@ describe('pipeline graph semantics (afi-config mirror)', () => {
 
   it('a non-scorer sink reachable from entry is a scorer bypass', () => {
     const p = base();
-    p.nodes.push({ id: 'dangling', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '1.0.0' } as any);
+    p.nodes.push({ id: 'dangling', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '2.0.0' } as any);
     p.edges.push({ from: 'technical', to: 'dangling' } as any);
     expect(messages(pipelineGraphViolations(p))).toContain("non-scorer sink 'dangling'");
   });
 
   it('nodes unreachable from entry are rejected', () => {
     const p = base();
-    p.nodes.push({ id: 'island', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '1.0.0' } as any);
+    p.nodes.push({ id: 'island', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '2.0.0' } as any);
     p.edges.push({ from: 'island', to: 'merge' } as any);
     expect(messages(pipelineGraphViolations(p))).toContain("node 'island' unreachable from entry");
   });
 
   it('a scorer with outgoing edges is not a sink', () => {
     const p = base();
-    p.nodes.push({ id: 'post', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '1.0.0' } as any);
+    p.nodes.push({ id: 'post', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '2.0.0' } as any);
     p.edges.push({ from: 'scorer', to: 'post' } as any);
     expect(messages(pipelineGraphViolations(p))).toContain('scorer is not a sink');
   });
@@ -241,7 +241,7 @@ describe('plugin binding checks (fail closed on unknown identity)', () => {
     const p = base();
     (p.nodes[1] as any).pluginId = 'afi-analysis-sentiment';
     const msgs = messages(pluginBindingViolations(p, plugins));
-    expect(msgs).toContain("does not match plugin 'afi-analysis-sentiment@1.0.0' category 'sentiment'");
+    expect(msgs).toContain("does not match plugin 'afi-analysis-sentiment@2.0.0' category 'sentiment'");
   });
 
   it('node.config is validated against the bound paramsSchema (unknown + ill-typed params)', () => {
@@ -258,7 +258,7 @@ describe('plugin binding checks (fail closed on unknown identity)', () => {
     (strictPlugin.paramsSchema as any).required = ['windowHours'];
     const set = plugins.map((x) => (x.pluginId === 'afi-analysis-news' ? strictPlugin : x));
     const p = base();
-    p.nodes.push({ id: 'news', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '1.0.0' } as any);
+    p.nodes.push({ id: 'news', category: 'news', pluginId: 'afi-analysis-news', pluginVersion: '2.0.0' } as any);
     p.edges.push({ from: 'technical', to: 'news' } as any, { from: 'news', to: 'merge' } as any);
     const msgs = messages(pluginBindingViolations(p, set));
     expect(msgs).toContain('config invalid against plugin');
@@ -269,7 +269,7 @@ describe('plugin binding checks (fail closed on unknown identity)', () => {
     const tech = noMulti.find((x) => x.pluginId === 'afi-analysis-technical')!;
     (tech as any).multiInstance = false;
     const p = base();
-    p.nodes.push({ id: 'technical2', category: 'technical', pluginId: 'afi-analysis-technical', pluginVersion: '1.0.0' } as any);
+    p.nodes.push({ id: 'technical2', category: 'technical', pluginId: 'afi-analysis-technical', pluginVersion: '2.0.0' } as any);
     p.edges.push({ from: 'technical', to: 'technical2' } as any, { from: 'technical2', to: 'merge' } as any);
     (p.nodes[3] as any).join = { policy: 'all', merge: { strategy: 'namespace-by-node', conflictRule: 'error' } };
     expect(messages(pluginBindingViolations(p, noMulti))).toContain('does not declare multiInstance:true');
@@ -280,7 +280,7 @@ describe('plugin binding checks (fail closed on unknown identity)', () => {
     const p = base();
     (p.nodes[3] as any).critical = false;
     (p.nodes[3] as any).failurePolicy = 'degrade'; // merge permits only 'abort'
-    expect(messages(pluginBindingViolations(p, plugins))).toContain("failurePolicy 'degrade' is not permitted by plugin 'afi-merge-enriched-view@1.0.0'");
+    expect(messages(pluginBindingViolations(p, plugins))).toContain("failurePolicy 'degrade' is not permitted by plugin 'afi-merge-enriched-view@1.1.0'");
   });
 
   it('a mayFeedScorer:false plugin wired into the scorer is rejected', () => {
@@ -389,7 +389,7 @@ describe('registration + provider-binding semantics', () => {
         domainTag: 'afi.d2.analyst-config',
         value: 'a'.repeat(64),
       },
-      configRef: 'templates/official/froggy-trend-pullback/analyst-config.json',
+      configRef: 'afi-config/registries/analyst-strategies/froggy--trend_pullback_v1--1.0.0.config.json',
       providerBindingPolicy: { mode: 'any-authenticated' },
       status: 'active',
       registeredAt: '2026-07-16',
