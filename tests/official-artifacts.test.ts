@@ -23,7 +23,7 @@ import { officialDir, officialPlugins, readJson } from './helpers.js';
 // below; identical to
 // the values recorded by the canonical analyst-strategy registration and the
 // runtime's composition provenance).
-const PINNED_AFI_CONFIG_COMMIT = '22e79cff1c4b312db792ef71b10d1610fcdbc65c';
+const PINNED_AFI_CONFIG_COMMIT = 'd6f2504805059ffa09d8c1bfcecb67cd47abcea2';
 const CANONICAL_MANIFEST_HASH = 'df3372dadaca1595d0e6d2f6bad9464ccc9abb7106e9f5b7111df148a145bc4f';
 const CANONICAL_ANALYST_CONFIG_HASH = 'e34471dec8dd3b8fcf0e5576765e469aec1a89f77af6b693ef3c06fc4200bbad';
 const CANONICAL_PLUGIN_SET_HASH = '5384e1c08ce4bd7f533acc15487df81d7d37b6615d109d611bde968a81f2f386';
