@@ -12,7 +12,9 @@ import { repoRoot, readJson } from './helpers.js';
  * both are therefore excluded from the Factory-authored-text scans below.
  */
 
-const EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.git', '.logs']);
+// _afi-config is the CI checkout of the PINNED canonical source (ci.yml) —
+// canonical bytes, not Factory-authored text.
+const EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.git', '.logs', '_afi-config']);
 const CANONICAL_EXCLUDED = ['src/governed-schema', 'src/generated'];
 
 function walk(dir: string, acc: string[] = []): string[] {
