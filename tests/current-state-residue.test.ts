@@ -53,11 +53,17 @@ describe('current-state residue guards', () => {
     const refs = [...ci.matchAll(/ref:\s*([0-9a-f]{40})/g)].map((m) => m[1]);
     expect(refs, 'CI pinned afi-config checkout').toEqual([pin]);
 
-    // No other 40-hex commit pin may appear in Factory-authored text.
+    // No other commit pin — full or shorthand — may appear in Factory-authored
+    // text: every 40-hex string must BE the pin, and every afi-config@<sha>
+    // reference must be a prefix of it.
     for (const f of factoryAuthoredFiles()) {
       const content = readFileSync(f, 'utf-8');
+      const rel = relative(repoRoot, f);
       for (const m of content.matchAll(/\b[0-9a-f]{40}\b/g)) {
-        expect(m[0], `stray commit pin in ${relative(repoRoot, f)}`).toBe(pin);
+        expect(m[0], `stray commit pin in ${rel}`).toBe(pin);
+      }
+      for (const m of content.matchAll(/afi-config@([0-9a-f]{7,40})\b/g)) {
+        expect(pin.startsWith(m[1]), `stray shorthand afi-config pin '${m[1]}' in ${rel}`).toBe(true);
       }
     }
   });

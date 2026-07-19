@@ -1,7 +1,7 @@
 /**
  * Strict AJV validation over the vendored governed schema closure
- * (src/governed-schema/, byte-pinned to afi-config@f91ce446 — see
- * MANIFEST.json and tests/governed-schema-drift.test.ts).
+ * (src/governed-schema/, byte-pinned to the afi-config commit recorded in
+ * MANIFEST.json and enforced by tests/governed-schema-drift.test.ts).
  *
  * All vendored schemas are preloaded so cross-schema $refs (the CanonicalHash
  * reference) resolve locally — never over the network.

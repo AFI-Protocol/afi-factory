@@ -389,7 +389,7 @@ describe('registration + provider-binding semantics', () => {
         domainTag: 'afi.d2.analyst-config',
         value: 'a'.repeat(64),
       },
-      configRef: 'templates/official/froggy-trend-pullback/analyst-config.json',
+      configRef: 'afi-config/registries/analyst-strategies/froggy--trend_pullback_v1--1.0.0.config.json',
       providerBindingPolicy: { mode: 'any-authenticated' },
       status: 'active',
       registeredAt: '2026-07-16',
