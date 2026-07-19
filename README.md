@@ -12,7 +12,7 @@ the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
   closed) into concrete `afi.pipeline.v1` manifests.
 - **Manifest validation** — strict AJV validation against the **vendored,
   byte-pinned** afi-config contract closure (`src/governed-schema/`, pinned to
-  afi-config `22e79cff1c4b312db792ef71b10d1610fcdbc65c`), plus the semantic
+  afi-config `d6f2504805059ffa09d8c1bfcecb67cd47abcea2`), plus the semantic
   graph layer the schemas delegate to tooling: unique node ids, known edge
   endpoints, Kahn acyclicity, exactly one non-bypassable scorer sink,
   join-declaration rules, `prefer:` parent checks, condition-path

@@ -203,7 +203,7 @@ describe('schema-layer negatives (strict AJV, pointered errors)', () => {
   it('wrong schema const, unknown category, malformed plugin refs and versions are rejected', () => {
     const wrongs: Array<(p: any) => void> = [
       (p) => (p.schema = 'afi.pipeline.v2'),
-      (p) => (p.nodes[0].category = 'social'),
+      (p) => (p.nodes[0].category = 'notacategory'),
       (p) => (p.nodes[0].pluginId = '../evil/path'),
       (p) => (p.nodes[0].pluginVersion = 'v1.0.0'),
       (p) => (p.pipelineVersion = '1.0.0'),
@@ -223,7 +223,7 @@ describe('schema-layer negatives (strict AJV, pointered errors)', () => {
 
   it('schema errors carry JSON-pointer instance paths', () => {
     const p = base() as any;
-    p.nodes[0].category = 'social';
+    p.nodes[0].category = 'notacategory';
     const result = validateAgainstSchema('pipeline', p);
     expect(result.errors.some((e) => e.pointer === '/nodes/0/category')).toBe(true);
   });

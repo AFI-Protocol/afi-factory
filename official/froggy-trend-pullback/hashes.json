@@ -1,6 +1,6 @@
 {
   "$comment": "Canonical hashes of the official froggy-trend-pullback composition artifacts (pipeline v1.3.0, EV3-GOV D-EV3-5(1)), computed by the afi-factory hasher (canonical-json-hashing.v1; domain tags per D-FCP-7). The artifacts are byte-identical copies of the afi-config@afiConfigCommit registry records; the values below equal the pins carried by the canonical analyst-strategy config/registration and the runtime composition provenance. Recomputed and asserted byte-equal by tests/official-artifacts.test.ts — downstream waves pin these values.",
-  "afiConfigCommit": "22e79cff1c4b312db792ef71b10d1610fcdbc65c",
+  "afiConfigCommit": "d6f2504805059ffa09d8c1bfcecb67cd47abcea2",
   "artifacts": {
     "pipelineManifest": "official/froggy-trend-pullback/pipeline.manifest.json",
     "analystConfig": "official/froggy-trend-pullback/analyst-config.json",

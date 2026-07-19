@@ -61,7 +61,7 @@ describe('pipeline validate', () => {
   it('invalid manifest -> nonzero exit with JSON-pointer errors', () => {
     const dir = tmp();
     const bad = clone(readJson<any>(manifestPath));
-    bad.nodes[0].category = 'social';
+    bad.nodes[0].category = 'notacategory';
     const file = join(dir, 'bad.json');
     writeFileSync(file, JSON.stringify(bad));
     const r = cli(['pipeline', 'validate', file]);
@@ -254,7 +254,7 @@ describe('plugin scaffold + init', () => {
 
   it('scaffold rejects an unknown category (nonzero exit)', () => {
     const dir = tmp();
-    const r = cli(['plugin', 'scaffold', '--id', 'x', '--category', 'social', '--dir', dir]);
+    const r = cli(['plugin', 'scaffold', '--id', 'x', '--category', 'notacategory', '--dir', dir]);
     expect(r.status).not.toBe(0);
   });
 

@@ -22,7 +22,7 @@
   ],
   "droid_ready": false,
   "notes": [
-    "Consumes the afi-config governed contract family as a VENDORED byte-pinned schema closure (src/governed-schema/, afi-config@22e79cff1c4b312db792ef71b10d1610fcdbc65c) — no package or file: dependency on afi-config; works from a clean clone",
+    "Consumes the afi-config governed contract family as a VENDORED byte-pinned schema closure (src/governed-schema/, afi-config@d6f2504805059ffa09d8c1bfcecb67cd47abcea2) — no package or file: dependency on afi-config; works from a clean clone",
     "afi-reactor consumes the authored artifacts (SLOT-FCP-REACTOR merged); it holds no package or file: dependency on this repo — the temporary sequencing shims were removed under D-FCP-9 after the replacing slots' gates passed",
     "Authorized by afi-governance/decisions/factory-configurable-pipelines-v1.md (SLOT-FCP-FACTORY row)"
   ]

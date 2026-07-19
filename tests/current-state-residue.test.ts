@@ -71,25 +71,41 @@ describe('current-state residue guards', () => {
   });
 
   it('no superseded evidence-contract identifier appears in Factory-authored text', () => {
-    // Constructed so this guard's own source (excluded anyway) stays greppable.
-    const banned = [/scored-signal-evidence\.v[12]\b/, /\bEvidenceV[12]\b/, /\bevidence\.v[12]\b/i];
+    // Any evidence-contract reference must be the current major (v3); a superseded
+    // major is caught by capturing the version digit, never by spelling the token.
     for (const f of factoryAuthoredFiles()) {
       const content = readFileSync(f, 'utf-8');
-      for (const re of banned) {
-        expect(re.test(content), `${relative(repoRoot, f)} matches ${re}`).toBe(false);
+      const rel = relative(repoRoot, f);
+      for (const m of content.matchAll(/scored-signal-evidence\.v(\d+)/g)) {
+        expect(m[1], `${rel} references a superseded evidence-contract major`).toBe('3');
+      }
+      for (const m of content.matchAll(/\bEvidenceV(\d+)/g)) {
+        expect(m[1], `${rel} references a superseded EvidenceV major`).toBe('3');
+      }
+      for (const m of content.matchAll(/\bevidence\.v(\d+)/gi)) {
+        expect(m[1], `${rel} references a superseded evidence.v major`).toBe('3');
       }
     }
   });
 
-  it('no retired terminology returns (Pipeheads, generic DAG runtime, social category)', () => {
+  it('no retired architecture terminology returns to Factory-authored text', () => {
+    // Retired tokens are assembled from fragments at runtime, so this guard's own
+    // source contains no complete retired literal (no self-exemption required).
+    const retiredTokens = [['pipe', 'head'].join(''), ['src/', 'dag'].join('')];
+    const retiredCategory = ['soc', 'ial'].join('');
     for (const f of factoryAuthoredFiles()) {
-      const content = readFileSync(f, 'utf-8');
       const rel = relative(repoRoot, f);
-      expect(/pipehead/i.test(content), `${rel} mentions Pipeheads`).toBe(false);
-      expect(content.includes('src/dag'), `${rel} mentions a generic DAG runtime home`).toBe(false);
-      // 'social' may appear ONLY as a rejected value in negative tests.
+      const content = readFileSync(f, 'utf-8').toLowerCase();
+      for (const tok of retiredTokens) {
+        expect(content.includes(tok), `${rel} contains a retired architecture token`).toBe(false);
+      }
+      // The superseded fifth-category identity may not appear as a quoted category
+      // value in production-authored files (negative-value tests excepted).
       if (!rel.startsWith('tests/')) {
-        expect(/['"]social['"]/.test(content), `${rel} names 'social' as a category`).toBe(false);
+        expect(
+          content.includes(`'${retiredCategory}'`) || content.includes(`"${retiredCategory}"`),
+          `${rel} names the superseded category identity`,
+        ).toBe(false);
       }
     }
     // The governed category vocabulary itself has exactly the seven categories.
