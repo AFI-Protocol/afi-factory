@@ -5,7 +5,7 @@
  */
 
 /**
- * The canonical composition provenance stamp (afi.composition-ref.v1): the COMPLETE, hash-pinned identity of the composition that produced one scored signal — pipeline identity + canonical manifest hash, analyst-config hash, scorer plugin identity, the hash of the bound plugin-manifest set, the hash of the deterministic execution summary, and the hash of the enrichment bundle. Every field is REQUIRED and every hash is a CanonicalHash v1 ($ref ../provenance/v1/canonical-hash.schema.json): a v2 evidence record either carries the full composition provenance or does not exist. This realizes the reconciliation report's §9 N1 'canonical graph provenance' item as a dedicated referenced object (avoiding N5's strategyVersion overloading).
+ * The canonical composition provenance stamp (afi.composition-ref.v1): the COMPLETE, hash-pinned identity of the composition that produced one scored signal — pipeline identity + canonical manifest hash, analyst-config hash, scorer plugin identity, the hash of the bound plugin-manifest set, the hash of the deterministic execution summary, and the hash of the enrichment bundle. Every field is REQUIRED and every hash is a CanonicalHash v1 ($ref ../provenance/v1/canonical-hash.schema.json): a canonical scored-signal evidence record either carries the complete composition provenance required by this contract or is invalid. This realizes the reconciliation report's §9 N1 'canonical graph provenance' item as a dedicated referenced object (avoiding N5's strategyVersion overloading).
  */
 export interface CompositionRef {
   /**
