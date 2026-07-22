@@ -1,7 +1,14 @@
-# Quant onboarding — authoring a strategy pipeline
+# Quant onboarding — authoring a strategy workflow
 
-You are composing **registered analysis plugins** into a scoring pipeline for
-your strategy. You author *documents*; nothing here executes.
+Factory is your **strategy workshop**. Here you turn a market idea into a
+repeatable AFI **strategy workflow**: the signals it watches, the analysis it
+runs, and how it's scored. You author *documents* that describe the workflow —
+nothing here trades, executes, or scores. Once your workflow is registered,
+**Machine** scores its signals (execution and trading happen on other AFI
+surfaces).
+
+In technical terms you are composing **registered analysis plugins** into a
+scoring pipeline; the steps below use the exact commands.
 
 ## 1. Start a project
 
@@ -9,8 +16,9 @@ your strategy. You author *documents*; nothing here executes.
 npx afi-factory init my-strategy
 ```
 
-This scaffolds a template, its instantiated manifest, an analyst-config pinned
-by canonical hash, and two plugin manifest skeletons.
+This sets up a starter strategy workflow: a template, its instantiated manifest,
+an analyst-config carrying a verifiable workflow fingerprint, and two plugin
+skeletons.
 
 ## 2. Shape the graph
 

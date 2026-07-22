@@ -1,8 +1,10 @@
 # Operator onboarding — installing and running validation
 
-You are installing afi-factory to validate composition artifacts (CI gates,
-registry review, pre-deployment checks). Factory executes nothing and needs
-no services, no credentials, and no sibling checkouts.
+You are installing Factory to **validate and prepare AFI strategy workflows** —
+CI gates, registry review, pre-registration checks. Factory executes nothing and
+needs no services, no credentials, and no sibling checkouts. (Under the hood the
+things you validate are composition manifests, analyst-configs, and plugin sets;
+the commands below are exact.)
 
 ## Install
 
@@ -38,7 +40,7 @@ codes over any summary text.
 ## What capabilities mean for you
 
 Plugin manifests declare **requirement classes** the runtime environment must
-satisfy. The official froggy set's five category-lane plugins each declare
+satisfy. The official composition's five category-lane plugins each declare
 `provider:instance-backed`: the concrete provider is selected per lane by the
 manifest's explicit `providerInstanceRef` (the committed refs form the
 all-five keyless/self-hosted reference profile; the `aiMl` lane pins the

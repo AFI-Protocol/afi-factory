@@ -1,10 +1,70 @@
-# afi-factory
+# AFI Factory
 
-The AFI **pipeline authoring system** — the replaceable authoring implementation of
-the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
-`afi-governance/decisions/factory-configurable-pipelines-v1.md`, D-FCP-4).
+**AFI Factory is the strategy workshop for Agentic Financial Intelligence.**
 
-## What Factory does
+Factory helps traders, quants, builders, and agents turn market ideas into
+repeatable **AFI-powered workflows** — deciding what signals to watch, what
+analysis to run, how scoring should apply, and how the workflow connects into
+AFI. Factory prepares the **playbook**; it does not trade, and it does not score.
+
+**Where Factory sits in AFI:**
+
+- **Factory** builds the playbooks — the strategy and agent workflows.
+- **Machine** scores the signals.
+- **Gateway** provides protocol access.
+- **MCP** connects agents.
+- **BUY SELL TERMINAL**, if and when built, is the trader-facing cockpit.
+
+**You work with Factory through three surfaces**, all backed by one authoring
+engine:
+
+- a **local CLI** — for advanced users and operators to create, check, and
+  prepare strategy workflows;
+- an **MCP interface** — so an agent can help design, check, and prepare those
+  workflows;
+- a **TypeScript library** — to build on the same authoring functions directly.
+
+> **Under the hood** — Factory is the analyst-configurable pipeline *authoring*
+> implementation (SLOT-FCP-FACTORY, authorized by
+> `afi-governance/decisions/factory-configurable-pipelines-v1.md`, D-FCP-4). The
+> contract-level mechanics — pipeline manifests, canonical hashing, and the typed
+> operation layer — are documented in the technical sections below and remain exact.
+
+## What Factory is / is not
+
+**Factory is:**
+
+- a **strategy-workflow authoring surface** — define what a strategy watches,
+  what analysis runs, and how scoring applies;
+- a **local CLI** for preparing and checking AFI workflows;
+- an **agent-facing MCP surface** for designing and validating workflows;
+- a **developer-accessible TypeScript library**.
+
+**Factory is not:**
+
+- a trading terminal or trade-execution system;
+- the scoring engine — that is **Machine**;
+- the protocol gateway — that is **Gateway**;
+- a hosted web app or visual editor;
+- a wallet, rewards, or settlement surface.
+
+Factory prepares the playbook; other AFI surfaces run it.
+
+## The Factory CLI is not a trading terminal
+
+The `afi-factory` CLI is an **authoring** tool. It creates, checks, and prepares
+AFI strategy workflows — it never places an order, connects to a broker, moves a
+position, or runs a live strategy.
+
+A trader-facing cockpit — **BUY SELL TERMINAL** or another future app — is a
+separate surface built for traders. A trader may act through such a terminal, a
+web app, or an agent, while Factory works behind the scenes to prepare the
+workflow those surfaces rely on.
+
+Factory prepares the playbook; the terminal (when it exists) is where a trader
+acts on it.
+
+## Authoring capabilities
 
 - **Template authoring + instantiation** — author `afi.pipeline-template.v1`
   documents with `{"$param":"<name>"}` value slots; instantiate them (defaults
@@ -28,16 +88,25 @@ the analyst-configurable pipelines program (SLOT-FCP-FACTORY, authorized by
 - **Plugin scaffolding** — `afi.analysis-plugin.v1` manifest skeletons plus a
   TypeScript implementation-contract stub.
 
-## Agent capability layer
+## Connect an agent (MCP)
 
-Every authoring capability above is also exposed to agents through **one
-implementation-backed operation registry** (`src/operations/`). The TypeScript
-SDK, the `afi-factory` CLI, the machine-readable capability catalog, the generic
-agent-tool definitions, and the MCP adapter are all **projections over the same
-typed operation handlers** — a capability cannot exist without a real handler,
-a validated input schema, a validated output schema, a declared filesystem/
-security policy, and test coverage. Changing or removing an operation changes
-every projection.
+**Connect an agent to Factory so it can help design, check, and prepare
+AFI-powered strategy workflows.** For example: a quant tells their agent *"draft
+a momentum strategy that watches 15-minute candles, add a sentiment check, and
+score it with an AFI scoring template."* The agent uses Factory's tools to draft
+and assemble the workflow, validate it against the available analysis steps,
+inspect the execution graph, and give it a verifiable workflow fingerprint —
+without a person hand-writing a manifest. Factory only *authors and checks*; the
+agent never trades or scores through it.
+
+Under the hood, every authoring capability above is exposed to agents through
+**one implementation-backed operation registry** (`src/operations/`). The
+TypeScript library, the `afi-factory` CLI, the machine-readable capability
+catalog, the generic agent-tool definitions, and the MCP interface are all
+**projections over the same typed operation handlers** — a capability cannot
+exist without a real handler, a validated input schema, a validated output
+schema, a declared filesystem/security policy, and test coverage. Changing or
+removing an operation changes every projection.
 
 - **Machine-readable capability discovery** — `afi-factory capabilities --json`
   emits a deterministic catalog (stable id-sorted order, no timestamps/paths/
@@ -226,10 +295,11 @@ fixtures exercised by the test suite.
 
 ## Persona docs
 
-- [Quant: authoring a strategy pipeline](docs/onboarding/quant-authoring.md)
+- [Quant: authoring a strategy workflow](docs/onboarding/quant-authoring.md)
 - [Plugin developer](docs/onboarding/plugin-developer.md)
 - [Provider binding](docs/onboarding/provider-binding.md)
 - [Operator: installing and running validation](docs/onboarding/operator.md)
+- [AFI City — Factory landmark copy (handoff)](docs/afi-city-copy.md)
 
 ## License
 
