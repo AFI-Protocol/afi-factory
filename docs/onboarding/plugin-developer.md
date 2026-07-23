@@ -1,8 +1,10 @@
 # Plugin developer onboarding
 
-You are declaring (and separately implementing) one analysis plugin in the
-seven governed categories: `technical`, `pattern`, `sentiment`, `news`,
-`aiMl`, `merge`, `scorer`.
+Plugins are the reusable **analysis and scoring building blocks** a strategy
+workflow draws on — so this is the most technical persona. You are declaring
+(and separately implementing) one analysis plugin in the seven governed
+categories: `technical`, `pattern`, `sentiment`, `news`, `aiMl`, `merge`,
+`scorer`.
 
 ## 1. Scaffold the manifest + contract stub
 
