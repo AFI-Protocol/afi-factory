@@ -299,7 +299,6 @@ fixtures exercised by the test suite.
 - [Plugin developer](docs/onboarding/plugin-developer.md)
 - [Provider binding](docs/onboarding/provider-binding.md)
 - [Operator: installing and running validation](docs/onboarding/operator.md)
-- [AFI City — Factory landmark copy (handoff)](docs/afi-city-copy.md)
 
 ## License
 
